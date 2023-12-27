@@ -1,8 +1,14 @@
-FROM node:16-slim
+FROM node:17
+
+RUN apt-get update -y && apt-get install -y openssl
+
+COPY package*.json ./
+
+RUN npm i
 
 COPY . .
 
-RUN npm i
+RUN npx prisma generate
 
 RUN npx prisma db push
 

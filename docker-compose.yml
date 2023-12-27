@@ -1,6 +1,5 @@
-# docker-compose.yml
-
 version: '3.8'
+
 services:
  postgres:
    container_name: postgres
