@@ -8,8 +8,8 @@ RUN npm i
 
 COPY . .
 
-RUN npx prisma generate
+# RUN npx prisma generate
 
-RUN npx prisma db push
+# RUN npx prisma db push
 
-CMD ["npm", "run", "build"]
+CMD ["./script.sh"]
