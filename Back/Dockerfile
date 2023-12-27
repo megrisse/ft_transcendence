@@ -1,4 +1,4 @@
-FROM node:17
+FROM node:18
 
 RUN apt-get update -y && apt-get install -y openssl
 
@@ -8,8 +8,10 @@ RUN npm i
 
 COPY . .
 
+RUN chmod +x script.sh
+
 # RUN npx prisma generate
 
 # RUN npx prisma db push
 
-CMD ["./script.sh"]
+CMD ["sh", "./script.sh"]
