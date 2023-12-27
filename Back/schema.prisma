@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource database {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String @id @default(uuid())
+  IsEnabled             Boolean @default(false)
+  TwoFASecret           String ?
+  username              String ? @default("")
+  email                 String ? @unique
+  myInvitedFriends      Friend[] @relation("inviteSender")
+  invitedByFriends      Friend[] @relation("inviteReciever")
+  sentConversations     Conversation[] @relation("sender")
+  recievedConversations Conversation[] @relation("reciever")
+  MatchA                Match[] @relation("playerA")
+  MatchB                Match[] @relation("playerB")
+  invitationSent        Invitation[] @relation("invitationSender")
+  invitationRecieved    Invitation[] @relation("invitationReciever")
+  avatar                String ? @default("http://res.cloudinary.com/dvmxfvju3/image/upload/v1700925320/wu4zkfcugvnsbykwmzpw.jpg")
+  achievements          String[]
+  bandUsers             String[]
+  bandBy                String[]
+  online                Boolean ? @default(false)
+  inGame                Boolean ? @default(false)
+  level                 Float @default(0)
+  channels              ChannelOnUser[]
+  channelMessages       ChannelMessage[]
+  isAuth                Boolean @default(false)
+}
+
+model ChannelOnUser {
+ userId     String
+ channelId  String
+ user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ channel    Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+ isAdmin    Boolean @default(false)
+ isOwner    Boolean @default(false)
+ isBanned   Boolean @default(false)
+ isMuted    Boolean @default(false)
+ until      DateTime
+ @@id([userId, channelId])
+}
+
+model Channel {
+  id                    String   @id @default(uuid())
+  name                  String   @unique
+  users                 ChannelOnUser[]
+  owner                 String ?
+  IsPrivate             Boolean ?
+  IsProtected           Boolean ?
+  password              String ?
+  passwordHash          String ?
+  channelMessages       ChannelMessage[]
+}
+
+model Friend {
+  id                    String @id @default(uuid())
+  inviteRecieverId      String 
+  inviteSenderId        String
+  inviteReciever        User @relation("inviteReciever", fields: [inviteRecieverId], references: [id], onDelete: Cascade)
+  inviteSender          User @relation("inviteSender", fields: [inviteSenderId], references: [id], onDelete: Cascade)
+  latestMessage         String ? @default("")
+  latestMessageDate     DateTime @default(now())
+}
+
+model Invitation {
+  id                    String @id @default(uuid())
+  invitationRecieverId  String
+  invitationSenderId    String
+  inviteStatus          Int
+  inviteReciever        User @relation("invitationReciever", fields: [invitationRecieverId], references: [id], onDelete: Cascade)
+  inviteSender          User @relation("invitationSender", fields: [invitationSenderId], references: [id], onDelete: Cascade)
+}
+
+model Conversation {
+  id                    String @id @default(uuid())
+  senderId              String
+  recieverId            String
+  userA                 User  @relation("sender", fields: [senderId], references: [id], onDelete: Cascade)
+  userB                 User  @relation("reciever", fields: [recieverId], references: [id], onDelete: Cascade)
+  messages              Message[]
+  updatedAt             DateTime @default(now())
+}
+
+model Message {
+  id                    String @id @default(uuid())
+  conversationId        String
+  time                  DateTime ?
+  content               String
+  senderId              String
+  recieverId            String
+  recieved              Boolean @default(false)
+  conversation          Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  date                  DateTime ? @default(now())
+}
+
+model ChannelMessage {
+  id                    String @id @default(uuid())
+  sender                String
+  userId                String
+  user                  User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content               String
+  channelName           String
+  channelId             String
+  channel               Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+}
+
+model Match {
+  id                    String @id @default(uuid())
+  playerAId             String
+  playerBId             String
+  playerAScore          Int
+  playerBScore          Int
+  playerA               User  @relation("playerA", fields: [playerAId], references: [id], onDelete: Cascade)
+  playerB               User  @relation("playerB", fields: [playerBId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  icon                  String
+  title                 String @id @unique
+  unlocked              Boolean
+}
+
+enum InvitationStatus{
+  pending
+  accepted
+  declined
+}
