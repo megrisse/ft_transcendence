@@ -4,8 +4,6 @@ COPY . .
 
 RUN npm i
 
-RUN npm prisma:generate
-
-RUN npm prisma:migrate:deploy
+RUN npx prisma db push
 
 CMD ["npm", "run", "build"]
