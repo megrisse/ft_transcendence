@@ -1,6 +1,6 @@
 #!/bin/bash
 
-npx prisma generate || exit 1
+# npx prisma generate || exit 1
 npx prisma db push || exit 1
 npm run build || exit 1
 npm run start
