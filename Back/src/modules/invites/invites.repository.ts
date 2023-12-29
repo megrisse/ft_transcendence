@@ -64,6 +64,27 @@ export class InvitesRepository {
         })
     }
 
+    async hasInvite(id : string, _id : string) : Promise<boolean> {
+        let check : InviteDto = await this.prisma.invitation.findFirst({
+            where : {
+                OR : [
+                    {
+                        invitationSenderId : id,
+                        invitationRecieverId : _id,
+                    },
+                    {
+                        invitationRecieverId : id,
+                        invitationSenderId : id,
+                    }
+                ]
+            }
+        })
+        if (check) {
+            return true
+        }
+        return false
+    }
+
     async deleteInvite (_id :string) : Promise<any> {
         console.log(`the id is : ${_id}`)
         await this.prisma.invitation.delete({where : {id: _id}});

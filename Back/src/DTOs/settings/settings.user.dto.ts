@@ -1,6 +1,7 @@
 
 export class friends {
     name : string;
+    id   : string;
     online : boolean;
     inGame : boolean;
 }

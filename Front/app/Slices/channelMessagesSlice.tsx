@@ -3,6 +3,7 @@ import { createAsyncThunk ,createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { STATUS_CODES } from 'http';
 import store from "../store/store"
 import { channelSearchType } from '../components/channelSearch';
+import axios from 'axios';
 
 type channelNames = {
     channels: channelConversation[],
@@ -74,19 +75,17 @@ type channelConversation = {
    
 
    export const fetchChannelData = createAsyncThunk("channel/fetch", async (thunkApi) => {
-    try {
-        const response = await fetch("http://localhost:4000/Chat/channel", {
-          method: "GET",
-          credentials: 'include',
-        });
-        const data = await response.json();
-        // console.log('Chat data from server:', data);
-        return data;
-      } catch (error) {
-        console.error('Error fetching chat chat data:', error);
-        throw error;
-      }
-})   
+          const response = await axios.get('http://localhost:4000/Chat/channel', {withCredentials: true });
+          if (response.status === 401){
+            console.log('Eroororororo 401');
+          }
+          if (response.status === 200) {
+            console.log('chatData getted successfully:', response.data);
+            return (response.data);
+          }else {
+            console.error('Data getting failed:', response.data);
+          }
+        } )
    
 const initialState:{entity:channelNames, loading : boolean, error : string} = {
     entity: {
@@ -129,7 +128,7 @@ const channelMessagesSlice = createSlice({
         state.error = action.error.message || 'Something went wrong !';
       })
       .addCase(joinChannel.pending, (state) => {
-        state.loading = true;
+        // state.loading = true;
       })
       .addCase(joinChannel.fulfilled, (state, action) => {
         if (action.payload != "can't join") {
@@ -137,15 +136,15 @@ const channelMessagesSlice = createSlice({
             channelName : action.payload,
             messages : [],
           })
-          state.loading = false;
+          // state.loading = false;
         }
       })
       .addCase(joinChannel.rejected, (state, action) => {
-        state.loading = false;
+        // state.loading = false;
         state.error = action.error.message || 'Something went wrong !';
       })
       .addCase(leaveChannel.pending, (state) => {
-        state.loading = true;
+        // state.loading = true;
       })
       .addCase(leaveChannel.fulfilled, (state, action) => {
         // let index = state.entity.channels.indexOf({channelName : action.payload, messages : []})
@@ -156,10 +155,10 @@ const channelMessagesSlice = createSlice({
           }
         }
         state.entity.channels.splice(index, 1);
-        state.loading = false;
+        // state.loading = false;
       })
       .addCase(leaveChannel.rejected, (state, action) => {
-        state.loading = false;
+        // state.loading = false;
         state.error = action.error.message || 'Something went wrong !';
       });
   },

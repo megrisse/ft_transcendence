@@ -56,7 +56,7 @@ import { RootState } from '../store/store'
 //   error: null,
 // }
 
-interface MatchHIst {
+export interface MatchHIst {
   id: number;
   playerAId:number;
   playerBId:number;
@@ -70,11 +70,12 @@ interface MatchHIst {
 
 type Props = {
     index:number;
+    matche: MatchHIst;
   };
 
 
 
-function MatchHist({index}:Props) {
+function MatchHist({index, matche}:Props) {
 
 // function MatchHist() {
 
@@ -84,11 +85,11 @@ function MatchHist({index}:Props) {
   return (
     <div className='flex min-w-[300px] w-[85%] h-32 justify-between m-auto'>
         <div>
-          <MCard index={index}/>
+          <MCard index={index} matche={matche}/>
         </div>
           <div className='text-center m-auto text-xl medium:text-2xl'>vs</div>
         <div>
-          <CardM index={index}/>
+          <CardM index={index} matche={matche}/>
         </div>
     </div>
   )

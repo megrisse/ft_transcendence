@@ -31,7 +31,7 @@ function Card(props : CardData) {
       myMap.set("Friends","removeFriend");
       console.log('ikhan: ',       props.data);
     return (
-        <div className="w-[80%] md:w-1/4 h-[30%] flex flex-col m-5 p-5 items-center rounded-md bg-[#30313E]">
+        <div className="w-[80%] md:w-1/4 h-[30%] flex flex-col m-5 p-5 items-center rounded-md bg-[#323232]">
             <div className="w-full flex flex-row justify-around ">
                 <h3>{props.title}</h3>
                 {props.title != "Friends" && <Modal content="+" title={props.title}/>}

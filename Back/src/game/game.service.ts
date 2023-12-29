@@ -62,8 +62,9 @@ export class GameService{
     public score2          :number;
     maxScore        :number;
     maxTime         :number; // in minutes
+    public gameOverCallback: (gameId: string) => void;
 
-    constructor(private prisma: PrismaService , [client, userdto]: [Socket, UserDto],clientId: string,gameId: string , map: string, mode: gameMods){
+    constructor(private prisma: PrismaService , [client, userdto]: [Socket, UserDto],clientId: string,gameId: string , map: string, mode: gameMods, gameOverCallback: (gameId: string) => void){
         this.id = gameId;
         this.player1Id = clientId;
         this.user1Dto = userdto;
@@ -98,12 +99,11 @@ export class GameService{
             isStatic: true,
             chamfer: { radius: 10},
         });
-        //UPDATE THE POS OF GOUNDS
         this.grounds = [
-            Bodies.rectangle(0, 0, 1200, 10, { isStatic: true , label: "TOP"}),
-            Bodies.rectangle(0, 800, 1200, 10, { isStatic: true , label: "DOWN"}),
-            Bodies.rectangle(0, 0, 10, 1600, { isStatic: true , label: "LEFT"}),
-            Bodies.rectangle(600, 0, 10, 1600, { isStatic: true , label: "RIGHT"}),
+            Bodies.rectangle((0 + width / 2), 0, width, 10, { isStatic: true , label: "TOP"}),
+            Bodies.rectangle((0 + width / 2), height, width, 10, { isStatic: true , label: "DOWN"}),
+            Bodies.rectangle(0, (0 + height / 2), 10, height, { isStatic: true , label: "LEFT"}),
+            Bodies.rectangle(width, (0 + height / 2), 10, height, { isStatic: true , label: "RIGHT"}),
         ];
         
         this.obstacles = [];
@@ -125,16 +125,15 @@ export class GameService{
             this.maxScore = 3;
        }
        console.log("MAXSXORE: ", this.maxScore);
+       this.gameOverCallback = gameOverCallback;
        
     }
 
 
-
-
-
-    public async startGame(){
-        console.log("START GAME ||||||||||||");
-        // this.isRunning = true
+    private async sendStart(){
+        /**
+         * UPDATE THE STATE OF USER IN DATABASE AND SEND START EVENT
+         */
         await this.prisma.user.update({
             where :{
                 id : this.user1Dto.id,
@@ -174,6 +173,13 @@ export class GameService{
             avatar: [this.user1Dto.avatar, this.user2Dto.avatar],
             names: [this.user1Dto.username, this.user2Dto.username]
         });
+    }
+
+
+    public async startGame(){
+        console.log("START GAME ||||||||||||");
+        // this.isRunning = true
+        this.sendStart();
         console.log("client1: ", this.client1.id);
         console.log("client2: ", this.client2.id);
         
@@ -188,7 +194,7 @@ export class GameService{
             event.pairs.forEach((pair)=>{
                 const bodyA :Body = pair.bodyA;
                 const bodyB : Body = pair.bodyB;
-                if ((this.ball.velocity.x <= 0.001 && this.ball.velocity.x >= -0.001) || (this.ball.velocity.y <= 0.001 && this.ball.velocity.y >= -0.001))console.log("v.x: ", this.ball.velocity.x, " v.y: ", this.ball.velocity.y);
+                if ((this.ball.velocity.x <= 0.1 && this.ball.velocity.x >= -0.1) || (this.ball.velocity.y <= 0.1 && this.ball.velocity.y >= -0.01))console.log("v.x: ", this.ball.velocity.x, " v.y: ", this.ball.velocity.y);
                 
                 if (bodyA === this.ball || bodyB == this.ball){
                     const normal = pair.collision.normal;
@@ -200,17 +206,7 @@ export class GameService{
                             x: Math.min(this.ball.velocity.x + sign * i , this.maxVelocity),
                             y : this.ball.velocity.y
                         })
-                        const restitution = 1; // Adjust this value for desired bounciness
-                        const friction = 0; // Adjust this value for desired friction
-                        
-                        // Set restitution and friction for the ball
-                        // Body.set(this.ball, { restitution, friction });
                     }
-                    
-
-
-
-
                     const otherBody = bodyA === this.ball ? bodyB : bodyA;
                     if (otherBody.label === "TOP" || otherBody.label === "DOWN"){
                         if (otherBody.label === "TOP")          this.score1++;
@@ -255,8 +251,6 @@ export class GameService{
                         playerBScore: this.score2,
                     }
                 })
-                // if (!winnerUser || !LooserUser) 
-                //     return;
                 let winnerXp : number = Number(((((this.user1Dto.level + 1) * 10) / 100) + winnerUser.level).toPrecision(2)); 
                 let looserXp: number  = Number((((looserUser.level * 2) / 100) + looserUser.level).toPrecision(2));
                 
@@ -280,6 +274,7 @@ export class GameService{
                 })
                 
                 await this.updateAchivements(winnerUser.id, looserUser.id);
+                this.gameOverCallback(this.id);
             }
         })}
         catch (error) {
@@ -306,10 +301,7 @@ export class GameService{
                 "p2"    : this.reverseVector(this.p2.position),
                 "score1": this.score1,
                 "score2": this.score2,
-                // gameId: this.id
             });
-            // console.log("1 PLAYERs POS: ", this.p1.position, this.p2.position);
-            // console.log("2 PLAYERs POS: ", this.reverseVector(this.p1.position), this.reverseVector(this.p2.position));
             
         });
 
@@ -356,26 +348,7 @@ export class GameService{
             Runner.run(this.runner,this.engine);
             return
         }
-        let forceX : number = -1.3;
-        let forceY : number = -1.2;
-        if (this.serve){
-            
-            forceX = 1.3;
-            forceY = 1.2;
-        }
-        // console.log("Fx: ", forceX, " Fy: ", forceY);
-        this.serve = !this.serve
-        // this.ball = Bodies.circle(width / 2, height / 2, 10, { 
-        //     restitution: 1,
-        //     frictionAir: 0,
-        //     friction:0,
-        //     inertia: Infinity,
-        //     force:{x: forceX, y:forceY},
-        //     label: "ball"
-        // });
-        // Body.setVelocity(this.ball, {x: forceX,y: forceY})
         setTimeout(() =>{
-            // this.spownBall();
             Composite.add(this.engine.world, this.ball);
         }, 1000)
     }
@@ -389,12 +362,6 @@ export class GameService{
     }
 
     private async updateAchivements(winnerId: string, looserId: string){
-        /**
-         * if (!req.user.achievements.includes("https://res.cloudinary.com/dvmxfvju3/image/upload/v1699049653/qwt5g7xtl2aqybw77drz.png")) {
-                this.user.updateAcheivement("https://res.cloudinary.com/dvmxfvju3/image/upload/v1699049653/qwt5g7xtl2aqybw77drz.png", req.user.id)
-         * 
-         */
-
         const winner :UserDto = await this.prisma.user.findUnique({
             where: {
                 id: winnerId,

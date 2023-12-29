@@ -26,7 +26,7 @@ export class MatchesRepository {
         return await this.prisma.match.findMany();
     }
 
-    async findMatchesByUserId(id: string): Promise<MatchDto[]> {
+    async findMatchesByUserId(id: string): Promise<any> {
         console.log(id);
         return await this.prisma.match.findMany({
             where: {
@@ -35,6 +35,18 @@ export class MatchesRepository {
                     { playerBId: id },
                 ],
             },
+            include : {
+                playerA : {
+                    select : {
+                        username : true,
+                    }
+                },
+                playerB : {
+                    select : {
+                        username : true,
+                    }
+                }
+            }
         });
     }
 

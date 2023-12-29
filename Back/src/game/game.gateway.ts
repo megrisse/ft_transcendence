@@ -85,6 +85,7 @@ export class GameGeteway implements  OnGatewayConnection, OnGatewayDisconnect {
                     this.clients.set(client.id, [client, userdto]);
                     // client.emit("connect", { "clientId" : userdto.id })
                     console.log("connected: ", client.connected);
+                    client.emit("CONNECTED", {name: userdto.username, avatar: userdto.avatar, IsEnebled: userdto.IsEnabled, IsAuth: userdto.isAuth})
                     console.log();
 
 
@@ -120,8 +121,6 @@ export class GameGeteway implements  OnGatewayConnection, OnGatewayDisconnect {
             if (this.clients.has(client.id)) userdto = this.clients.get(client.id)[1]
             // else  client.emit("REDIRECT", { "url" : '/profile'});
             //REDIRECT TO PROFILE
-            console.log("                   userDto: ", userdto.id ," ", userdto.username);
-            
             if (userdto){
                 //CLEAR THE ARRAY OF GAME MODS !!!!!!!!!
                 this.deleteUserFromArrays(client.id);
@@ -182,7 +181,7 @@ export class GameGeteway implements  OnGatewayConnection, OnGatewayDisconnect {
                     let player2Id = this.getSockId(value[0][1] === false ? value[1][0]: value[0][0])
                     if (player2Id.length != 0){
                         console.log("p1::::: ", this.clients.get(id)[0].id, " p2::::: ", player2Id);
-                        this.createNewGame(this.clients.get(id)[0].id, "ADVANCED", "", player2Id)
+                        this.createNewGame(this.clients.get(id)[0].id, "ADVANCED", player2Id)
                     }
 
                     this.friend.delete(key);
@@ -213,7 +212,7 @@ export class GameGeteway implements  OnGatewayConnection, OnGatewayDisconnect {
             if (!userdto)
                 console.log("RANDOM : userdto NOT VALID");
 
-            this.createRandomGame(client.id , req.map, req.mod);
+            this.createRandomGame(client.id , req.map);
         console.log("end RANDOM.....");
         }catch(error){
             console.log("ERROR IN RANDOM: ", error);
@@ -241,13 +240,13 @@ export class GameGeteway implements  OnGatewayConnection, OnGatewayDisconnect {
 
     @SubscribeMessage("UPDATE")
     async updatePaddle(@MessageBody() req: {gameId: string, vec: Vector }, @ConnectedSocket() client : Socket){
-        // console.log("UPDATE ....");
+        console.log("UPDATE ....");
         try{
             // console.log("cliend sending the request : ", req);
 
             let userdto: UserDto = this.clients.get(client.id)[1]
             let game: GameService = this.Random.get(req.gameId);
-          // console.log("req UPDATE: ", req, " ", userdto.id);
+        //   console.log("req UPDATE: ", req, " ", userdto.id);
             if (!userdto)
                 {console.log("UPDATE : userdto NOT VALID");throw "invalid user"}
             // console.log("GAMEEEES:",game);
@@ -270,8 +269,10 @@ export class GameGeteway implements  OnGatewayConnection, OnGatewayDisconnect {
     async exitGame(@MessageBody() req: {gameId: string}, @ConnectedSocket() client : Socket){
         if (this.Random.has(req.gameId)){
             this.Random.get(req.gameId).stop;
-            this.Random.get(req.gameId).client1.emit("GAMEOVER")
-            this.Random.get(req.gameId).client2.emit("GAMEOVER")
+            client.id === this.Random.get(req.gameId).client1.id ? this.Random.get(req.gameId).client2.emit("GAMEOVER"): this.Random.get(req.gameId).client1.emit("GAMEOVER");
+            // this.Random.get(req.gameId).client1.emit("GAMEOVER")
+            // this.Random.get(req.gameId).client2.emit("GAMEOVER")
+            this.Random.get(req.gameId).stop()
             this.Random.delete(req.gameId);
         }
     }
@@ -308,13 +309,16 @@ export class GameGeteway implements  OnGatewayConnection, OnGatewayDisconnect {
 
     ///        CREATE GAME FUNCTION             ///
 
-    private createNewGame(player1: string, map: string, mod: string, player2?: string){
+    private createNewGame(player1: string, map: string, player2?: string){
         let state = player2 === undefined  ? false : true;
         console.log(`state: ${state} p1: ${player1} p2: ${player2}`);
 
         const gameId = randomString(20);
 
-        this.Random.set(gameId, new GameService(this.prisma, this.clients.get(player1),player1, gameId, map, gameMods.DEFI));
+        this.Random.set(gameId, new GameService(this.prisma, this.clients.get(player1),player1, gameId, map, gameMods.DEFI, (gameId: string) => {
+            this.Random.delete(gameId);
+            
+        }));
 
         if (!state)
             this.clients.get(player1)[0].emit("CREATE", { gameId : "gameId", });
@@ -334,7 +338,7 @@ export class GameGeteway implements  OnGatewayConnection, OnGatewayDisconnect {
     }
 
 
-    private createRandomGame (player: string, map: string, mod: string){
+    private createRandomGame (player: string, map: string){
         // const
         if (map === "BEGINNER")this.randomBeg.push(player)
         else if (map === "INTEMIDIER")this.randomInt.push(player)
@@ -349,18 +353,18 @@ export class GameGeteway implements  OnGatewayConnection, OnGatewayDisconnect {
         if (map === "BEGINNER" && this.randomBeg.length >= 2) {
             player1 = this.randomBeg.shift();
             player2 = this.randomBeg.shift();
-            this.createNewGame(player1 , map, mod, player2);
+            this.createNewGame(player1 , map, player2);
         }
         else if (map === "INTEMIDIER" && this.randomInt.length >= 2) {
             player1 = this.randomInt.shift();
             player2 = this.randomInt.shift();
-            this.createNewGame(player1 , map, mod, player2);
+            this.createNewGame(player1 , map, player2);
         }
         else if (map === "ADVANCED" && this.randomAdv.length >= 2) {
             player1 = this.randomAdv.shift();
             player2 = this.randomAdv.shift();
             console.log("map: ", map, "p1 : ", player1," p2 :", player2);
-            this.createNewGame(player1 , map, mod, player2);
+            this.createNewGame(player1 , map, player2);
         }
     }
 

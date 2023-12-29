@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { PropagateLoader, GridLoader } from "react-spinners";
 import Link from "next/link";
-import {updateUserImage, updateUserNameValue} from '../Slices/userSlice';
+import {updateUser2FaValue, updateUserImage, updateUserNameValue} from '../Slices/userSlice';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
@@ -38,12 +38,14 @@ export default function setting() {
   const [inputValue, setInputValue] = useState('');
   const dispatch = useDispatch<AppDispatch>();
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
+  const isAuth = useSelector((state: RootState) => state.user.entity?.userData.isAuth);
+  const isEnab = useSelector((state: RootState) => state.user.entity?.userData.IsEnabled);
+  console.log('== is Enab = ', useSelector((state: RootState) => state.user.entity?.userData.IsEnabled));
+  console.log('== is Auth = ', useSelector((state: RootState) => state.user.entity?.userData.isAuth));
   
   
   
-  const [code, setCode] = useState<any>({
-    code: ""
-  });
+  const [code, setCode] = useState<string>("");
   
   const [imageD, setImageD] = useState<File | null>(null);
   const [formData, setFormData] = useState({
@@ -58,7 +60,13 @@ export default function setting() {
       ...prevData,
       checked_: checkedTFA, 
     }));
+    
   }, [checkedTFA])
+  
+  useEffect(() => {
+    dispatch(updateUser2FaValue(formData.checked_));
+
+  }, [formData.checked_])
 
   useEffect (() => {
     userName &&
@@ -187,9 +195,7 @@ export default function setting() {
         const updatedCode = response.data.code;
         
         setLoadingCode(false);
-        setCode((prevCode: any) => {
-          return { code: updatedCode };
-        });
+        setCode(updatedCode);
         
       } else {
         console.error('Data submission failed:', response.data);
@@ -199,7 +205,7 @@ export default function setting() {
         setErrorCode(error as string)
         setLoadingSubmit(false);
         document.getElementById('notifyError')?.click();
-        console.error('Error submitting data:', error);
+      
     }
   };
 
@@ -302,7 +308,7 @@ export default function setting() {
                   {/* <button type="submit" className="xMedium:h-[5rem] py-6 Large:h-24 h-16 w-[400px] mx-auto  xMedium:min-w-[500px] border-x-2 border-[#E58E27] rounded-3xl bg-[#323232] text-slate-100 text-xl xMedium:text-2xl hover:bg-[#E58E27] hover:opacity-80 transition duration-700">SAVE</button> */}
                   {loadingSubmit ? (<button className="xMedium:h-[5rem] py-6 Large:h-24 h-16 w-[400px] mx-auto  xMedium:min-w-[500px] border-x-2 border-[#E58E27] rounded-3xl bg-[#323232]  text-xl xMedium:text-2xl hover:opacity-80 transition duration-700"><ClipLoader className="text-white" color={"#E58E27"} loading={loadingSubmit} size={30} aria-label="Loading Spinner" /></button>) : (<button type="submit" data-modal-target="timeline-modal" data-modal-toggle="timeline-modal" className="xMedium:h-[5rem] py-6 Large:h-24 h-16 w-[400px] mx-auto  xMedium:min-w-[500px] border-x-2 border-[#E58E27] rounded-3xl bg-[#323232] text-slate-100 text-xl xMedium:text-2xl hover:bg-[#E58E27] hover:opacity-80 transition duration-700">Validate</button>)}
                   {/* Pop-up */}
-                  <div id="timeline-modal"  aria-hidden="true" className={`${tfaEnabled && formData?.checked_ ? "" : "hidden"} overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}>
+                  <div id="timeline-modal"  aria-hidden="true" className={` ${(tfaEnabled && isEnab && formData?.checked_) ? "" : "hidden"} overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}>
                       <div className="top-[25%] left-[10%] medium:left-[35%] relative p-4 w-full max-w-md max-h-full">
                           <div className="relative bg-[#131313] bg-opacity-60 text-white rounded-lg shadow">
                                   <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
@@ -318,13 +324,26 @@ export default function setting() {
                                   </div>
                                   <div className="p-4 md:p-5">
                                       <div className="relative flex flex-col justify-center items-center gap-4 border-gray-200 ms-3.5 mb-4 md:mb-5">
-                                        {loadingCode ? <h3>LOADING ...</h3> : <div></div>}
+                                        {code ?
+                                          (
+                                            loadingCode ? (<div><h3>LOADING ...</h3>
+                                            <div><GridLoader color={"#E58E27"} loading={loadingCode} size={10} aria-label="Loading Spinner" /></div></div>) : (<img src={code} alt="Your Image" className=" w-52 h-52 rounded-lg border"/>)
+                                          ) : (<h1>zebi la dkhelti</h1>)}
+                                        {/* {loadingCode ? <h3>LOADING ...</h3> : <div></div>}
                                         {loadingCode ? (<div><GridLoader color={"#E58E27"} loading={loadingCode} size={10} aria-label="Loading Spinner" /></div>) :
-                                          (<img src={code.code} alt="Your Image" className=" w-52 h-52 rounded-lg border"/>)  }                                         
+                                          (<img src={code} alt="Your Image" className=" w-52 h-52 rounded-lg border"/>)  }      
+                                          {
+                                            !code ? (<h1>zebi la dkhelti</h1>) : (<div></div>)
+                                          }                                    */}
                                       </div>
-                                      <button className="text-white inline-flex w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                                      {
+                                        code ? (<button className="text-white inline-flex w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                                         <Link href={'/2FaValidation'}> VERIFY </Link>
-                                      </button>
+                                      </button>) : (<button className="text-white inline-flex w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                                        <Link href={'/2FaValidation'}> Valider oula khrej t9awed </Link>
+                                      </button>)
+                                      }
+                                      
                                   </div>
                               </div>
                       </div>

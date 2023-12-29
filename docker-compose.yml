@@ -6,17 +6,21 @@ services:
    image: postgres:latest
    restart: always
    environment:
-     - POSTGRES_USER=postgres
-     - POSTGRES_PASSWORD=postgres
+     - POSTGRES_USER=${PS_USER}
+     - POSTGRES_PASSWORD=${PS_PASS}
    ports:
      - 5432:5432
 
  backend:
    container_name: backend
    build: ./Back
+   env_file: .env
    restart: always
    ports:
     - "127.0.0.1:4000:4000"
+    - "127.0.0.1:8008:8008"
+    - "127.0.0.1:8080:8080"
+    - "127.0.0.1:8888:8888"
    depends_on:
     - postgres
 
@@ -26,5 +30,5 @@ services:
    restart: always
    ports:
     - "127.0.0.1:3000:3000"
-   depends_on: 
+   depends_on:
     - backend

@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { addMessageToChannel, fetchChannelData, leaveChannel, updateChannelMessages } from '../Slices/channelMessagesSlice';
 import Link from 'next/link';
 import ChannelSearch from '../components/channelSearch';
+import { PropagateLoader } from 'react-spinners';
 
 type channelNames = {
   channels: channelConversation[],
@@ -33,6 +34,9 @@ function ChannelChat() {
   const [redirecting, setRedirection] = useState<boolean>(false);
   const dispatch = useDispatch<AppDispatch>();
   let channelData: channelNames = useSelector((state: RootState) => state.channelMessages.entity);
+  const loading: boolean = useSelector((state: RootState) => state.channelMessages.loading);
+  const error: string | null = useSelector((state: RootState) => state.channelMessages.error);
+  console.log('error chat = ', error);
  
 
   const handleChannelMessage = useCallback((res : channelMessages) => {
@@ -59,9 +63,9 @@ function ChannelChat() {
         console.log("current data : ", channelData);
       }
   }, [socket]); 
-  useEffect(() => {
-    dispatch(fetchChannelData());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchChannelData());
+  // }, [dispatch]);
  
   useEffect(() => {
     const channelToRender = channelData.channels.find(channel => channel.channelName === ChoosenChannel) || { channelName: "", messages: [] };
@@ -90,20 +94,24 @@ function ChannelChat() {
     dispatch(updateChannelMessages({ channelName: name, messages: data}));
     SetChoosenChannel(name);
   }
-  if (redirecting)
+  if (loading ){
     return (
-      <div className='w-full h-full flex justify-center items-center text-orange-500'>
-        <h1  >Redirecting to Profile ... Please Wait ...</h1>
+      <div className="text-white flex flex-col justify-center items-center w-full h-[70%] xMedium:h-screen">
+        <div className="m-auto flex flex-col justify-center text-xl h-[30%]">
+          <div className="absolute top-[45%] left-[42%] medium:left-[45%]">  LOADING . . .</div>
+          <div className="absolute top-[50%] left-[48%]"><PropagateLoader color={"#E58E27"} loading={loading} size={20} aria-label="Loading Spinner"/></div>
+        </div>
       </div>
-  )
+    )
+  }
  return (
-    <div className="relative h-[80%] w-full flex flex-row md:flex-col items-center justify-around p-5">
-      <div className=' w-[30%] h-full flex flex-col items-center rounded-lg border border-[#E58E27]'>
+    <div className="relative h-[80%] w-full flex flex-col md:flex-row items-center justify-around p-5">
+      <div className=' w-[60%] h-[40%] md:h-[90%] md:w-[30%]  flex flex-col items-center rounded-lg border border-[#E58E27] '>
         <div className='flex flex-row'>
           <h3 className='p-4 flex-start'>conversations</h3>
           <ChannelSearch />
         </div>
-           <div className='w-full h-full text-white flex flex-col items-center overflow-y-auto scrollbar-hide'>
+           <div className='w-full h-full text-white flex flex-col items-center overflow-y-auto scrollbar-hide '>
               {channelData && channelData.channels.map((channel, index) => {
                return (
                <div className='w-full text-center bg-[#E58E27] bg-opacity-50 p-2 rounded-lg m-2 border border-[#E58E27]' key={index} style={{cursor: 'pointer'}} onClick={() => handleClick(channel.channelName)}>{channel.channelName}</div>
@@ -112,7 +120,7 @@ function ChannelChat() {
            </div>
         </div>
 
-    <div className='overflow-hidden w-[60%]  h-full flex flex-col items-center rounded-lg border border-[#E58E27] relative'>
+    <div className='overflow-hidden w-[90%]  h-[90%] flex flex-col items-center rounded-lg border border-[#E58E27] relative '>
         {ChoosenChannel && <div className='w-full flex flex-row justify-between text-center border border-[#E58E27]'>
           <h3 className='p-4'>{ChoosenChannel}</h3>
            <button className='m-2 p-2 rounded-lg border border-[#E58E27]' onClick={()=> {handlLeave()}} >Leave</button>

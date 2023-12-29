@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { AiOutlineMenu } from "react-icons/ai";
 import React from 'react';
 import { getCookie } from 'cookies-next';
+import NotFoud404 from './notFoud404/page';
 
 
 interface Datas {
@@ -55,14 +56,15 @@ export default function RootLayout({
     // console.log(isOpen);
     
 
-    // if (router !== '/chat' && router !== '/profile' && router !== '/setting' && router !== '/login' && router !== '/rank' && router !== '/profs' && router !== '/game' && router !== '/2FaValidation' && router !== '/login') {
+    // if (router !== '/chat' && router !== '/profile' && router !== '/setting' && router !== '/login' && router !== '/rank' && router !== '/profs' && router !== '/game' && router !== '/2FaValidation' && router !== '/userSettings'  && router !== '/channelSet'  && router !== '/channel' && router.startsWith("/profile/")) {
     //   return <NotFoud404/>;
     // }
+
     if (router === '/2FaValidation' || router === '/login'){
 
       return (
         
-        <html lang="en" className={spaceGrotesk.className}>
+        <html lang="en">
         <body className=''>
           <main className='flex min-w-fit h-screen text-white justify-start bg-[#131313] ' >
               <div className='w-full medium:h-screen xMedium:h-full'>
@@ -73,10 +75,11 @@ export default function RootLayout({
       </html>
     )
   }
+  
   return (
 
     <MyProvider>
-      <html lang="en" className={spaceGrotesk.className}>
+      <html lang="en" >
         <body className=' bg-[#131313] h-full w-full'>
           <main className='flex min-w-fit h-full text-white justify-start relative' >
               <div><button onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className={`${childData?.loading || childData?.error ? "hidden" : "block"} cursor-pointer absolute text-xl left-5 medium:hidden p-2 bg-[#E58E27] rounded-full top-3 z-50 w-5 h-10`}><AiOutlineMenu/></button></div>

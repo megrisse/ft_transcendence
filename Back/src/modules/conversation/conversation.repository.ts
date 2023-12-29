@@ -81,4 +81,30 @@ async updateConversationDate(conversationId: string) {
         await this.Prisma.conversation.delete({where : {id : conversationData.id,}})
         return "deleted"
     }
+
+    async conversationExist(sender: string, receiver : string) : Promise<ConversationDto> {
+        try {
+            let exist : ConversationDto = await this.Prisma.conversation.findFirst({
+                where : {
+                    OR : [
+                        {
+                            senderId : sender,
+                            recieverId : receiver
+                        },
+                        {
+                            senderId : receiver,
+                            recieverId : sender
+                        }
+                    ]
+                }
+            })
+            if (!exist) {
+                return null
+            }
+            return exist
+        }
+        catch (error) {
+            return null
+        }
+    }
 }

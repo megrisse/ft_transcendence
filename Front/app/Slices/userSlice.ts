@@ -14,7 +14,8 @@ interface UserData {
   rank: number;
   level: number;
   avatar: string;
-  IsEnabled?: boolean
+  IsEnabled?: boolean;
+  isAuth: boolean;
 }
 
 interface MatchHIst {
@@ -111,6 +112,11 @@ const userSlice = createSlice({
         state.entity.userData.username = action.payload;
       }
     },
+    updateUser2FaValue: (state, action: PayloadAction<boolean>) => {
+      if (state.entity && state.entity.userData) {
+        state.entity.userData.IsEnabled = action.payload;
+      }
+    },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
@@ -142,7 +148,7 @@ const userSlice = createSlice({
 
 // export const { addInfos } = userSlice.actions;
 export default userSlice.reducer;
-export const { updateUserNameValue, updateUserImage } = userSlice.actions;
+export const { updateUserNameValue, updateUserImage, updateUser2FaValue } = userSlice.actions;
 export const { setLoading } = userSlice.actions;
 
 

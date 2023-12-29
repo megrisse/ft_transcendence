@@ -44,7 +44,7 @@ const Modal = (props: ModalType) => {
         </button>
       )}
       <button
-        className="bg-orange-500 text-white active:bg-[#30313E]
+        className="bg-orange-500 text-white active:bg-[#323232]
       font-bold px-2 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1"
         type="button"
         onClick={() => setShowModal(true)}
@@ -55,7 +55,7 @@ const Modal = (props: ModalType) => {
         <>
           <div className="flex justify-center items-center overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
             <div className="relative w-auto my-6 mx-auto max-w-3xl">
-              <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-[#30313E] outline-none focus:outline-none">
+              <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-[#323232] outline-none focus:outline-none">
                 <div className="flex items-start justify-between p-5 border-b border-solid border-gray-300 rounded-t ">
                   <button
                     className="bg-transparent border-0 text-black float-right"

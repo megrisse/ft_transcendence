@@ -36,19 +36,18 @@ const initialState:{entity:Conversation []; loading: boolean; error: null | stri
 
 
 export const fetchChatData = createAsyncThunk("chat/fetch", async (thunkApi) => {
-  
+
   const response = await axios.get('http://localhost:4000/Chat/user', {withCredentials: true });
   if (response.status === 401){
     console.log('Eroororororo 401');
   }
   if (response.status === 200) {
-    console.log('Data getted successfully:', response.data);
-    console.log("status = ", response.headers["set-cookies"]);
+    console.log('chatData getted successfully:', response.data);
     return (response.data);
   }else {
-    console.error('Error fetching chat chat data:', response.data);
+    console.error('Data getting failed:', response.data);
   }
-})
+} )
 
 const chatSlice = createSlice({
   name: 'chat',
@@ -71,7 +70,8 @@ const chatSlice = createSlice({
      //    receiver:conversation.receiver
      //  });
      //}
-    }
+    },
+    
     },
   extraReducers: (builder) => {
     builder

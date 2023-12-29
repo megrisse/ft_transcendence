@@ -46,6 +46,8 @@ export class SideBarGateway implements OnGatewayConnection, OnGatewayDisconnect{
                         console.log("updated to true ..");
                     }
                 }
+            } else {
+                throw("error")
             }
         } catch (error) {
             client.emit("ERROR", "invalid token ...")

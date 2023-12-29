@@ -31,6 +31,8 @@ export class UserDto {
     level : number;
 
     isAuth ? : boolean;
+
+    rank ?: number;
 }
 
 export class TwoFaV {

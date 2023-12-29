@@ -62,6 +62,11 @@ export class settingsController {
         try {
             console.log("trying to change data : ",data);
             const user = req.user
+            let tmp : UserDto = await this.user.getUserByUsername(data.username)
+            if (tmp && req.user.username != data.username) {
+                res.status(400).json("username already used")
+                return
+            }
             var userData = await this.user.updateUsername(user.id, data.username)
             if (data.checked_ === false && data.checked_ !== req.user.IsEnabled) {
 

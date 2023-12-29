@@ -14,7 +14,7 @@ import { UserService } from 'src/auth/Services/user.service';
 
 @Module({
     imports :[],
-    providers: [UsersRepository, PrismaService, FriendsRepository, InvitesRepository, MatchesRepository, messageRepository, converationRepositroy, PrismaService, AchievementRepository, FileService, CloudinaryService, UserService],
+    providers: [UsersRepository, PrismaService, FriendsRepository, InvitesRepository, MatchesRepository, messageRepository, converationRepositroy, PrismaService, AchievementRepository, FileService, CloudinaryService, UserService, InvitesRepository],
     controllers : [ProfileController]
 })
 
