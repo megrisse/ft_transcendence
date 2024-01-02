@@ -27,25 +27,31 @@ export class AuthController {
 
         if (user1 && user1.id !== req.user.id) {
             var user : UserDto = await this.userService.createUser(req.user);
-            await this.user.updateUsername(req.user.id, req.user.username + "-")
-            var token = await this.userService.sign(req.user.id, req.user.username);
+            user = await this.user.updateUsername(req.user.id, req.user.username + "-")
+            var token = await this.userService.sign(user.id, user.username);
         }
         else {
             var user : UserDto = await this.userService.createUser(req.user);
-            var token = await this.userService.sign(req.user.id, req.user.username);
+            var token = await this.userService.sign(user.id, user.username);
         }
         res.cookie('jwt-token', token, {
             expires: new Date(Date.now() + 900000000),
             httpOnly: true
         })
+
         if (user.IsEnabled)
             res.redirect('http://localhost:3000/2FaValidation')
-        else if (!user.isLogg) {
+        else if ((user.isLogg) === false) {
+
+            console.log("user", user);
             await this.userService.updateIslogg(user.id, true)
             res.redirect(`http://localhost:3000/setting`);
         }
-        else
+        else if (user.isLogg === true) {
+
+            console.log("user else ", user);
             res.redirect(`http://localhost:3000/profile`);
+        }
     }
 
     @Get('google/callback')
