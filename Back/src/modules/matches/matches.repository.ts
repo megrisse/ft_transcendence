@@ -17,9 +17,7 @@ export class MatchesRepository {
                 playerBScore : _playerBScore,
             }})
         }
-        catch (error) {
-            console.log("error creating game")
-        }
+        catch (error) {}
     }
     
     async GetMatches() : Promise<MatchDto[]> {
@@ -27,7 +25,6 @@ export class MatchesRepository {
     }
 
     async findMatchesByUserId(id: string): Promise<any> {
-        console.log(id);
         return await this.prisma.match.findMany({
             where: {
                 OR: [
@@ -52,7 +49,6 @@ export class MatchesRepository {
 
     async CheckForGamesAchievements(matches: MatchDto[], _id : string) : Promise<any> {
         let user : UserDto = await this.prisma.user.findUnique({where : {id : _id}})
-        console.log(user);
         if (!user)
             return
         if (matches.length > 0 && !user.achievements.includes('https://res.cloudinary.com/dvmxfvju3/image/upload/v1699322232/umkxxvgtxbe2bowynp8v.png')) {

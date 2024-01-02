@@ -33,17 +33,13 @@ export class SideBarGateway implements OnGatewayConnection, OnGatewayDisconnect{
     async handleConnection(client: any, ...args: any[]) {
         try {
             let cookie : string = client.client.request.headers.cookie;
-            console.log("sidebar connected : " , cookie);
             
             if (cookie) {
                 const user =  this.jwtService.verify( cookie.substring(cookie.indexOf('=') + 1), { secret: this.configService.get<string>('JWTSECRET') });
-                console.log("user : ", user);
-                console.log(user)
                 if (user) {
                     const test = await this.user.getUserById(user.sub);
                     if (test) {
                         await this.user.updateUserOnlineStatus(true, test.id)
-                        console.log("updated to true ..");
                     }
                 }
             } else {
@@ -51,26 +47,20 @@ export class SideBarGateway implements OnGatewayConnection, OnGatewayDisconnect{
             }
         } catch (error) {
             client.emit("ERROR", "invalid token ...")
-            console.log("err , ", error);
             
         }
     }
     
     async handleDisconnect(client: any) {
         try {
-            console.log("sidebar disconnected ....");
             let cookie : string = client.client.request.headers.cookie;
-            console.log("00000000000 cookie 00000000000 >>>>> ",cookie);
             
             if (cookie) {
                 const user =  this.jwtService.verify( cookie.substring(cookie.indexOf('=') + 1), { secret: this.configService.get<string>('JWTSECRET') });
-                console.log(user)
                 if (user) {
                     const test = await this.user.getUserById(user.sub);
-                    if (test) {
+                    if (test) 
                         await this.user.updateUserOnlineStatus(false, test.id)
-                        console.log("updated to false ..");
-                    }
             }
         }
         } catch (error) {

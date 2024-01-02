@@ -32,12 +32,6 @@ export class TwoFAConroller {
         let user = req.user;
         const id = user.id;
         const Pin = body.code;
-        console.log(body)
-        console.log("pin : ", Pin);
-
-        console.log("ZEBIIII", body.code);
-
-        console.log(`hello : ${body.code}, hello : ${id}`)
         try {
 
             user = await this.userService.getUser(id);
@@ -46,7 +40,6 @@ export class TwoFAConroller {
 
             if (!isValid)
                 res.status(401).send('invalid otp, try again.')
-                // throw new UnauthorizedException('Wrong Authentication code');
             else {
                 user = await this.userService.updateIsAuthupdate(id, true);
                 res.status(200).json(user)

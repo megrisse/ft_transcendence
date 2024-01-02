@@ -32,7 +32,6 @@ export class InvitesRepository {
                 }
             ]
         }})
-        console.log(friends);
         if (invites.length || friends.length)
             return null;
         return await this.prisma.invitation.create({data});
@@ -44,16 +43,12 @@ export class InvitesRepository {
 
     async getInviteToValidate(sender : string, reciever : string) : Promise<InviteDto> {
         try {
-            console.log('got here ...');
             
             return await this.prisma.invitation.findFirst({where : {
                 invitationSenderId : sender,
                 invitationRecieverId : reciever
             }})
-        }catch (error) {
-            console.log('got an error //');
-            
-        }
+        }catch (error) { }
     }
 
     async getUserInviations(id: string) : Promise<InviteDto[]> {
@@ -86,8 +81,6 @@ export class InvitesRepository {
     }
 
     async deleteInvite (_id :string) : Promise<any> {
-        console.log(`the id is : ${_id}`)
         await this.prisma.invitation.delete({where : {id: _id}});
-        console.log("Deleted");
     }
 }

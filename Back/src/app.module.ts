@@ -14,6 +14,7 @@ import { GameGeteway } from "./game/game.gateway";
 import { UsersRepository } from "./modules/users/users.repository";
 import { SideBarGateway } from "./modules/sidebar/sidebar.gatway";
 import { SideBarModule } from "./modules/sidebar/sidebar.module";
+import { invitesModule } from "./invitegate/invite.module";
 
 
 @Module({
@@ -28,6 +29,7 @@ import { SideBarModule } from "./modules/sidebar/sidebar.module";
     LeaderboardModule, 
     SearchModule,
     SideBarModule,
+    invitesModule,
     EventEmitterModule.forRoot(),
   ],
   controllers: [],

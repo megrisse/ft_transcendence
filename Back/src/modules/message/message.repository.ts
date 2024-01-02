@@ -25,9 +25,7 @@ export class messageRepository {
             content : message.content,
             date : new Date()
         }})
-        } catch (error) {
-            console.log("exception ::::::");
-        }
+        } catch (error) {}
     }
 
     async getMessages(_conversation : ConversationDto, requesterId : string) : Promise<any> {

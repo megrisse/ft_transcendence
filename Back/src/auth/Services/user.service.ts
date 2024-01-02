@@ -16,8 +16,6 @@ export class UserService {
             return await this.prisma.user.findUnique({where: {id: id}})
         }
         catch (error) {
-            console.log("error ...");
-            
         }
     }
 
@@ -87,6 +85,15 @@ export class UserService {
         return await this.prisma.user.update({
             where: {id:id},
             data: {isAuth: state}
+        });
+    }
+
+    async updateIslogg(id : string, state : boolean):Promise<UserDto> {
+
+        return await this.prisma.user.update({
+
+            where: {id:id},
+            data: {islogg : state}
         });
     }
 }

@@ -21,14 +21,12 @@ export class TwoFAService {
             var secret : string = authenticator.generateSecret();
 
             await this.userService.set2FaScret(secret, data.id);
-            console.log(`secret : ${secret}`);
         }
         else
             secret = user.TwoFASecret;
-        const otpuri = authenticator.keyuri(user.username, "PongHub", secret);
+        const otpuri = authenticator.keyuri(user.username, process.env.TWO_FACTOR_AUTH_APP_NAME, secret);
 
         const qrImg:string = await toDataURL(otpuri);
-        console.log(qrImg);
         return qrImg;
     }
 

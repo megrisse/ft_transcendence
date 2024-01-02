@@ -30,8 +30,6 @@ export class SearchController {
             }
             res.status(200).json(searchResult)
         }
-        catch(error) {
-            console.log('error while getting search ... call ismail ');
-        }
+        catch(error) {}
     }
 }

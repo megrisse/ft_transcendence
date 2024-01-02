@@ -33,6 +33,8 @@ export class UserDto {
     isAuth ? : boolean;
 
     rank ?: number;
+
+    isLogg ?:boolean;
 }
 
 export class TwoFaV {

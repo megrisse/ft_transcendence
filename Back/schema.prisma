@@ -34,6 +34,7 @@ model User {
   channels              ChannelOnUser[]
   channelMessages       ChannelMessage[]
   isAuth                Boolean @default(false)
+  islogg                Boolean @default(false)
 }
 
 model ChannelOnUser {

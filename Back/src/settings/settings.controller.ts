@@ -17,24 +17,10 @@ export class settingsController {
         return await this.user.getUserById(id);
     }
 
-    // @Put('upload')
-    // @UseInterceptors(FileInterceptor('file'))
-    // @UseGuards(JwtAuth)
-    // async uploadFile(@UploadedFile() file: Express.Multer.File, @Req() req:Request & {user: UserDto}) {
-    //     let achievements : string[] = (await this.user.getUserById(req.user.id)).achievements
-    //     if (!achievements.includes('https://res.cloudinary.com/dvmxfvju3/image/upload/v1699322922/ds3v9fsgo1dlujvh8otp.png'))
-    //         await this.user.updateAcheivement('https://res.cloudinary.com/dvmxfvju3/image/upload/v1699322922/ds3v9fsgo1dlujvh8otp.png', req.user.id)
-    //     const tmp = await this.Cloudinary.uploadImage(file, req.user.id)
-    //     console.log(tmp);
-    //     const heha = await this.user.updateAvatar(req.user.id, tmp.url)
-    //     console.log(heha);
-    // }
-
     @Post('image')
     @UseGuards(JwtAuth)
     async updateUserAvatar(@Res() res: Response, @Body('url') url : string, @Req() req: Request & {user : UserDto}) {
         try {
-            console.log("url : ", url);
             if (url.length == 0) {
                 res.status(400).json("invalid url .....");
                 return;
@@ -50,7 +36,6 @@ export class settingsController {
             res.status(200).json("update Avatar Success .")
         } catch (error) {;
             res.status(400).json("can't upload image.")
-            console.log("err : ", error);
             
         }
     }
@@ -60,7 +45,6 @@ export class settingsController {
     async   updateUsername(@Res() res: Response, @Body() data : settingsDto, @Req() req: Request & {user : UserDto}) {
 
         try {
-            console.log("trying to change data : ",data);
             const user = req.user
             let tmp : UserDto = await this.user.getUserByUsername(data.username)
             if (tmp && req.user.username != data.username) {

@@ -26,20 +26,14 @@ export class LeaderboardController {
                 @Get()
                 @UseGuards(JwtAuth)
                 async getLeaderboard(@Req() req: Request & {user : UserDto}) : Promise<any> {
-                    console.log("got leaderboard =============================> ");
-                    // console.log('user : ', id);
                     let users: UserDto[] = await this.user.getAllUsers()
-                    console.log(users);
                     let leaderboard : LeaderboardDto[] = []
                     let _userAchievements : AchievementDto[] = await this.achievement.getAchievements()
                     users.forEach((user) => {
                         user.achievements.map(async (achievement)=> {
                             achievement = await this.achievement.getAchievementImage(achievement)
-                            console.log("7777777777 ==> ", achievement);
                         })
                     })
-                    // console.log("number : ", num);
-                    
                     for (let index : number = 0; index < users.length; index++ ) {
                         let num : number = await this.user.getMatches(users[index].id);
                             leaderboard.push({
@@ -51,7 +45,6 @@ export class LeaderboardController {
                             GamesPlayed : num,
                         })
                     }
-                    console.log("data ", leaderboard);
                     return (leaderboard)
                 }
        

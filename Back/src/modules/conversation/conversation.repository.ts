@@ -7,7 +7,6 @@ export class converationRepositroy {
     constructor (private Prisma : PrismaService) {}
 
     async createConversation(_recieverId : string, _senderId : string) : Promise<ConversationDto> {
-        console.log("sender in create : ", _senderId, " reciever : ", _recieverId);
         return await this.Prisma.conversation.create({data : {
             recieverId : _recieverId,
             senderId : _senderId,
@@ -61,14 +60,11 @@ export class converationRepositroy {
     }
 
 async updateConversationDate(conversationId: string) {
-    console.log("does it get recieved : ", conversationId);
-    
     let toUpdate : ConversationDto = await this.Prisma.conversation.findFirst({
         where : {
             id : conversationId
         }
     })
-    console.log("here  : ", toUpdate);
     if (toUpdate)
     await this.Prisma.conversation.update({where : {id : toUpdate.id},
         data : {

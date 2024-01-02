@@ -18,7 +18,6 @@ export class GameController {
     async CreateGame(@Body() data : MatchDto) : Promise<any> {
         const playerA : UserDto = await this.user.getUserById(data.playerAId);
         const playerB : UserDto = await this.user.getUserById(data.playerBId);
-        // console.log(data.playerAScore , data.playerBScore);
         return await this.games.CreateMatch(playerA, playerB,  data.playerAScore, data.playerBScore);
     }
 }

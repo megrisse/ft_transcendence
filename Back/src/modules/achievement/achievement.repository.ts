@@ -72,17 +72,13 @@ export class AchievementRepository {
         ];
         achievements.forEach(async (data)=> {
                 await this.prisma.achievement.create({data});
-                console.log(data)
             })
             
             return achievements;
     }
 
     async getAchievementImage(id: string): Promise<string | null> {
-        console.log('achievement param : ', id);
-        
         let tmp : AchievementDto[] = await this.prisma.achievement.findMany()
-        console.log("achievement : 000000000=> ", tmp);
         if (tmp){
             tmp.forEach((achievemnt)=> {
                 if (achievemnt.title == id)

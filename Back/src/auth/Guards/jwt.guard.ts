@@ -11,19 +11,11 @@ export class JwtAuth implements CanActivate {
         try {
             var request = context.switchToHttp().getRequest();
             var token : string = this.extractTokenFromHeader(request);
-            // var token : string = request.header.Authorization;
-            
-            // console.log(request.header.);
-            
-            // console.log(`token ====== ${token}`);
-            
             var payload = this.jwtService.verify(token)
-            // console.log(`user dyal jwt : ${payload.username}, token ${token}`);
             if (!token) 
                 return false;
 
             const user = await this.userService.getUser(payload.sub)
-            // console.log(`user :: ${user.username}`);
 
             if (!user) {
                 return false;

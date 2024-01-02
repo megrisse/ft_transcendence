@@ -46,6 +46,10 @@ export class GameService{
     serve           :boolean;
     client1         :Socket;
     client2         :Socket;
+    width           : number
+    height          : number
+    paddleWidth     : number
+    paddleHeight    : number
 
     // Engine Attribute
     engine          :Engine;
@@ -65,6 +69,10 @@ export class GameService{
     public gameOverCallback: (gameId: string) => void;
 
     constructor(private prisma: PrismaService , [client, userdto]: [Socket, UserDto],clientId: string,gameId: string , map: string, mode: gameMods, gameOverCallback: (gameId: string) => void){
+        this.width = width
+        this.height = height
+        this.paddleHeight = paddleHeight
+        this.paddleWidth = paddleWidth
         this.id = gameId;
         this.player1Id = clientId;
         this.user1Dto = userdto;
@@ -111,20 +119,19 @@ export class GameService{
         if (this.map === "ADVANCED")
         {
             this.obstacles = AdvancedObs;
-            this.maxVelocity = 10; //change
+            this.maxVelocity = 13;
             this.maxScore = 7;
             
         }
         else if (this.map === "INTEMIDIER"){
             this.obstacles = IntemidierObs
-            this.maxVelocity = 15
+            this.maxVelocity = 10
             this.maxScore = 5;
         }
         else if (this.map === "BEGINNER"){
-            this.maxVelocity = 10
+            this.maxVelocity = 7
             this.maxScore = 3;
        }
-       console.log("MAXSXORE: ", this.maxScore);
        this.gameOverCallback = gameOverCallback;
        
     }
@@ -177,12 +184,7 @@ export class GameService{
 
 
     public async startGame(){
-        console.log("START GAME ||||||||||||");
-        // this.isRunning = true
         this.sendStart();
-        console.log("client1: ", this.client1.id);
-        console.log("client2: ", this.client2.id);
-        
         Runner.run(this.runner, this.engine);
         Composite.add(this.engine.world, [this.p1, this.p2 , ...this.grounds, ...this.obstacles]);
         this.spownBall();
@@ -194,7 +196,7 @@ export class GameService{
             event.pairs.forEach((pair)=>{
                 const bodyA :Body = pair.bodyA;
                 const bodyB : Body = pair.bodyB;
-                if ((this.ball.velocity.x <= 0.1 && this.ball.velocity.x >= -0.1) || (this.ball.velocity.y <= 0.1 && this.ball.velocity.y >= -0.01))console.log("v.x: ", this.ball.velocity.x, " v.y: ", this.ball.velocity.y);
+                
                 
                 if (bodyA === this.ball || bodyB == this.ball){
                     const normal = pair.collision.normal;
@@ -202,18 +204,15 @@ export class GameService{
                     if (Math.abs(normal.x) < Threshold){
                         const sign = Math.sign(this.ball.velocity.x);
                         const i = 0.5;
-                        Body.setVelocity(this.ball, {
-                            x: Math.min(this.ball.velocity.x + sign * i , this.maxVelocity),
-                            y : this.ball.velocity.y
-                        })
+                        let newVelocity : Vector = { x : Math.min(this.ball.velocity.x + sign * i , this.maxVelocity), y : this.ball.velocity.y}
+                        if (Math.abs(newVelocity.x) < 1) newVelocity.x = sign * 1; // Minimum horizontal velocity
+                        if (Math.abs(newVelocity.y) < 1) newVelocity.y = sign * 1;
+                        Body.setVelocity(this.ball, newVelocity)
                     }
                     const otherBody = bodyA === this.ball ? bodyB : bodyA;
                     if (otherBody.label === "TOP" || otherBody.label === "DOWN"){
                         if (otherBody.label === "TOP")          this.score1++;
                         else if (otherBody.label === "DOWN")    this.score2++;
-                        console.log(this.user1Dto.username , " : Score: ", this.score1);
-                        console.log(this.user2Dto.username , " : Score: ", this.score2);
-                        
                         Body.setPosition(this.ball, { x: 300, y: 400 });
                         Body.setVelocity(this.ball, { x: this.ball.velocity.x < 0 ? 5 : -5 , y: this.ball.velocity.y > 0 ? 5:  -5});
                     }
@@ -221,8 +220,6 @@ export class GameService{
             });
             if (this.score1 === this.maxScore || this.score2 === this.maxScore ){
                 this.stop();
-                console.log("MAX:" , this.maxScore);
-                
                 let winnerUser : UserDto;
                 let looserUser : UserDto;
                 this.score1 === this.maxScore ? 
@@ -277,10 +274,7 @@ export class GameService{
                 this.gameOverCallback(this.id);
             }
         })}
-        catch (error) {
-            console.log("got an error ....");
-            
-        }
+        catch (error) {}
 
 
         
@@ -302,12 +296,14 @@ export class GameService{
                 "score1": this.score1,
                 "score2": this.score2,
             });
+            if ((this.ball.velocity.x <= 0.5 && this.ball.velocity.x >= -0.5) || 
+                        (this.ball.velocity.y <= 0.5 && this.ball.velocity.y >= -0.5))
+                    Body.setVelocity(this.ball, {x: this.ball.velocity.x + 0.5, y: this.ball.velocity.y + 0.5})
             
         });
 
     }   
 
-    public
     public setPlayer1(sock: Socket, id: string){
         this.player1Id = id;
         this.client1 = sock;
@@ -315,7 +311,6 @@ export class GameService{
     public setPlayer2([sock, user]: [Socket, UserDto], id: string){
         this.player2Id = id;
         this.user2Dto = user;
-        console.log("added id : ", id);
         
         this.client2 = sock;
     }

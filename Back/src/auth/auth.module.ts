@@ -21,7 +21,7 @@ import { TwoFAService } from './Services/2FA.service';
     imports: [ConfigModule.forRoot(), JwtModule.register({
         global: true,
         secret: process.env.JWTSECRET,
-        signOptions: {expiresIn: '1d'},
+        signOptions: {expiresIn: '7d'},
       }),
     ],
     providers: [UsersRepository, PrismaService, FriendsRepository, InvitesRepository, MatchesRepository, messageRepository, converationRepositroy, PrismaService, AchievementRepository, OAuth , PrismaService, GoogleStrategy, UserService, TwoFAService],

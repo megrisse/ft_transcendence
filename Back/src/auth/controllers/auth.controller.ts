@@ -5,10 +5,11 @@ import { FortyTwoOauthGuard } from "../Guards/42-oauth.guard";
 import { GoogleGuard } from "../Guards/google.OAuth.guard";
 import { JwtAuth } from "../Guards/jwt.guard";
 import { UserService } from "../Services/user.service";
+import { UsersRepository } from "src/modules/users/users.repository";
 
 @Controller('auth')
 export class AuthController {
-    constructor(private userService: UserService) {}
+    constructor(private userService: UserService, private user : UsersRepository) {}
 
     @Get('42')
     @UseGuards(FortyTwoOauthGuard)
@@ -22,17 +23,29 @@ export class AuthController {
     @UseGuards(FortyTwoOauthGuard)
     async fortytwoAuthCallback(@Req() req:Request & {user: UserDto},  @Res() res: Response) {
 
-        const user = await this.userService.createUser(req.user);
+        const user1 : UserDto = await this.user.getUserByUsername(req.user.username)
 
-        const token = await this.userService.sign(user.id, user.username);
+        if (user1 && user1.id !== req.user.id) {
+            var user : UserDto = await this.userService.createUser(req.user);
+            await this.user.updateUsername(req.user.id, req.user.username + "-")
+            var token = await this.userService.sign(req.user.id, req.user.username);
+        }
+        else {
+            var user : UserDto = await this.userService.createUser(req.user);
+            var token = await this.userService.sign(req.user.id, req.user.username);
+        }
         res.cookie('jwt-token', token, {
             expires: new Date(Date.now() + 900000000),
             httpOnly: true
         })
         if (user.IsEnabled)
             res.redirect('http://localhost:3000/2FaValidation')
-        else
+        else if (!user.isLogg) {
+            await this.userService.updateIslogg(user.id, true)
             res.redirect(`http://localhost:3000/setting`);
+        }
+        else
+            res.redirect(`http://localhost:3000/profile`);
     }
 
     @Get('google/callback')
@@ -47,13 +60,6 @@ export class AuthController {
             httpOnly: true
         })
         res.redirect(`http://localhost:4000/auth/home`);
-    }
-
-    @Get('home')
-    @UseGuards(JwtAuth)
-    async home(@Req() req: Request & {user: UserDto}) {
-        console.log(req.user);
-        return ;
     }
 
     @Post('logout')
