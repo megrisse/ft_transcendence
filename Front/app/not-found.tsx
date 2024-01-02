@@ -1,5 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
+
 function NotFoud404() {
   return (
     <div className='bg-[#131313] h-screen w-screen items-center flex m-auto justify-center'>

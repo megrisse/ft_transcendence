@@ -14,7 +14,7 @@ const paddleHeight = 20;
 let wallOptions = {
     isStatic: true,
     render: {
-        fillStyle: '#FFF',
+        fillStyle: '#AF6915',
         strokeStyle: '#000',
         lineWidth: 1,
     },
@@ -56,28 +56,28 @@ class GameClass {
     Id: number = 0;
     gameId: string;
     state: boolean;
-    mouse: Matter.Mouse;
-    mouseConstraint: Matter.MouseConstraint;
+    // mouse: Matter.Mouse;
+    // mouseConstraint: Matter.MouseConstraint;
+    public leftPressed: boolean = false;
+    public rightPressed: boolean = false;
+    private paddleVitess: number = 5;
 
 
-
-    private boundHandleMouseMove: (event: MouseEvent) => void;
+    private boundHandleKeyDown: (event: KeyboardEvent) => void;
+    private boundHandleKeyUp: (event: KeyboardEvent) => void;
 
     constructor(element: HTMLDivElement, map: string, mod: string, gameId: string, socket?: Socket){
-        // window.addEventListener('resize', this.calculateSize);
         this.state = false;
         if (socket)
             this.socket = socket
-        this.boundHandleMouseMove = this.mouseEvents.bind(this);
         this.gameId = gameId;
         this.map = map;
         this.mod = mod;
         
         this.element = element;
         [this.width, this.height] = this.calculateSize();
-        console.log("WIDTH: ", this.width, " HEIGHT: ", this.height);
-        if (map === "ADVANCED") this.maxVelocity += 6;
-        else if (map === "INTEMIDIER") this.maxVelocity += 3;
+        if (map === "ADVANCED") {this.maxVelocity += 6;this.paddleVitess += 6}
+        else if (map === "INTEMIDIER") {this.maxVelocity += 3;this.paddleVitess += 3}
         this.render = Render.create({
             engine: this.engine,
             element : this.element,
@@ -88,15 +88,10 @@ class GameClass {
                 wireframes: false,
             }
         })
-        this.mouse = Matter.Mouse.create(this.render.canvas);
-        Matter.Mouse.setElement(this.mouse, element);
-        this.mouseConstraint = Matter.MouseConstraint.create(this.engine, {
-          mouse: this.mouse,
-        });
         this.generateObs();
-        // this.element.addEventListener('mousemove', this.boundHandleMouseMove);
-        this.mouseEvents();
+        this.updatePaddlePosition();
         if (mod === "BOT"){
+            this.Id = 2;
             this.createWorld();
             this.handleCollistion()
             this.handleBotMovement()
@@ -104,16 +99,40 @@ class GameClass {
             Render.run(this.render);
             Runner.run(this.runner, this.engine);
         }
+
+        this.boundHandleKeyDown = this.keyDownHandler.bind(this);
+        this.boundHandleKeyUp = this.keyUpHandler.bind(this);
+        window.addEventListener('keydown', this.boundHandleKeyDown);
+        window.addEventListener('keyup', this.boundHandleKeyUp);
     }
-    
+    private keyDownHandler(event: KeyboardEvent) {
+        switch (event.code) {
+            case 'ArrowLeft':
+                
+                this.leftPressed = true;
+                break;
+                case 'ArrowRight':
+                    this.rightPressed = true;
+                    break;
+                }
+            }
+            
+    private keyUpHandler(event: KeyboardEvent) {
+        switch (event.code) {
+            case 'ArrowLeft':
+                this.leftPressed = false;
+                break;
+            case 'ArrowRight':
+                this.rightPressed = false;
+                break;
+            }
+    }
+
+
     private handleBallOut(){
         Events.on(this.engine, "afterUpdate", ()=>{
-            // if (this.ball.position.x < 0 || this.ball.position.x > this.width)
             if ((this.ball.position.y < 0 || this.ball.position.y > this.height) || (this.ball.position.x < 0 || this.ball.position.x > this.width)){
                 Runner.stop(this.runner);
-                //Engine.clear(this.engine);
-                console.log("KHRJAT y: ", this.ball.position.y);
-                console.log("KHRJAT x: ", this.ball.position.x);
                 Body.setPosition(this.ball, {x: this.width / 2, y: this.height / 2})
                 Body.setVelocity(this.ball, {x: -5, y: -5})
                 Runner.start(this.runner, this.engine);
@@ -143,8 +162,6 @@ class GameClass {
         // create all elements of engine
         this.state = true;
         this.Id = id;
-        console.log("--------- >ID: ", this.Id);
-        
         this.p1 = Bodies.rectangle(
             this.normalise(p1.x, 0, globalWidth, 0, this.width),
             this.normalise(p1.y, 0, globalHeight, 0, this.height),
@@ -153,7 +170,7 @@ class GameClass {
             {
                 isStatic: true,
                 chamfer: {radius: 10 * this.calculateScale() },
-                render: {fillStyle: 'purple'}
+                render: {fillStyle: '#AF6915'}
             }
         )
         this.p2 = Bodies.rectangle(
@@ -164,62 +181,45 @@ class GameClass {
             {
                 isStatic: true,
                 chamfer: {radius: 10 * this.calculateScale() },
-                render: {fillStyle: 'purple'}
+                render: {fillStyle: '#AF6915'}
             }
+            )
+            this.ball = Bodies.circle(
+                this.normalise(ball.x, 0, globalWidth, 0, this.width),
+                this.normalise(ball.y, 0, globalHeight, 0, this.height),
+                10 * this.calculateScale(),
+                {render: {fillStyle: '#AF6915'}}
         )
-        this.ball = Bodies.circle(
-            this.normalise(ball.x, 0, globalWidth, 0, this.width),
-            this.normalise(ball.y, 0, globalHeight, 0, this.height),
-            10 * this.calculateScale(),
-            // {render}
-        )
+        //
         Body.setVelocity(this.ball, {x: this.normalise(this.ball.velocity.x, 0 , globalWidth, 0, this.width), y: this.normalise(this.ball.velocity.y, 0 , globalHeight, 0, this.height)})
         Composite.add(this.engine.world, [this.ball, this.p1, this.p2]);
         Composite.add(this.engine.world, [...this.obstacles]);
         Render.run(this.render);
         Runner.run(this.runner, this.engine);
     }
-    
-    // public updateOnLigneSizeGame(element: HTMLDivElement){
-    //     //stop the rendring , upadate the positions and velocity of all element
-    //     this.element = element;
-    //     [this.width, this.height] = this.calculateSize();
-    //     this.render = Render.create({
-    //         engine: this.engine,
-    //         element : this.element,
-    //         options: {
-    //             background: generateColor(this.map),
-    //             width: this.width ,
-    //             height: this.height,
-    //             wireframes: false,
-    //         }
-    //     })
-    //     this.generateObs();
-    //     this.startOnligneGame(
-    //         {x: this.normalise(this.p1.position.x, 0 , globalWidth, 0, this.width), y: this.normalise(this.p1.position.y, 0 , globalHeight, 0, this.height)}, 
-    //         {x: this.normalise(this.p2.position.x, 0 , globalWidth, 0, this.width), y: this.normalise(this.p2.position.y, 0 , globalHeight, 0, this.height)}, 
-    //         {x: this.normalise(this.ball.position.x, 0 , globalWidth, 0, this.width), y: this.normalise(this.ball.position.y, 0 , globalHeight, 0, this.height)}, 
-    //         this.Id
-    //     )
-    // }
 
     private handleBotMovement(){
         Matter.Events.on(this.engine, "beforeUpdate", () => {
-            if (this.map === "ADVANCED")
-                Body.setPosition(this.p1,  { x: this.ball.position.x, y : this.p1.position.y})
-            else if (this.map === "INTEMIDIER"){
-                if (this.ball.position.x < this.height / 2)
-                    Body.setPosition(this.p1,  { x: this.ball.position.x, y : this.p1.position.y})
-                else
-                    Body.setPosition(this.p1,  { x: this.width - this.p2.position.x, y : this.p1.position.y})
+            const newPosX : number = this.ball.position.x
+            const min : number = this.normalise(paddleWidth / 2, 0, globalWidth, 0, this.width);
+            const max : number = this.width - min;
+            if (newPosX > min && newPosX < max){
+                if (this.map === "ADVANCED")
+                    Body.setPosition(this.p1,  { x: newPosX, y : this.p1.position.y})
+                else if (this.map === "INTEMIDIER"){
+                    if (this.ball.position.x < this.height / 2)
+                        Body.setPosition(this.p1,  { x: newPosX, y : this.p1.position.y})
+                    else
+                        Body.setPosition(this.p1,  { x: this.width - this.p2.position.x, y : this.p1.position.y})
 
-            }
-            else{
-                if (this.ball.position.x < this.height / 4)
-                    Body.setPosition(this.p1,  { x: this.ball.position.x, y : this.p1.position.y})
-                else
-                    Body.setPosition(this.p1,  { x: this.width - this.p2.position.x, y : this.p1.position.y})
+                }
+                else{
+                    if (this.ball.position.x < this.height / 4)
+                        Body.setPosition(this.p1,  { x: newPosX, y : this.p1.position.y})
+                    else
+                        Body.setPosition(this.p1,  { x: this.width - this.p2.position.x, y : this.p1.position.y})
 
+                }
             }
         });
     }
@@ -233,7 +233,7 @@ class GameClass {
             {
                 isStatic: true,
                 chamfer: {radius: 10 * this.calculateScale() },
-                render: {fillStyle: 'blue'}
+                render: {fillStyle: '#AF6915'}
             }
             
         );
@@ -245,7 +245,7 @@ class GameClass {
             {
                 isStatic: true,
                 chamfer: {radius: 10 * this.calculateScale() },
-                render: {fillStyle: 'blue'}
+                render: {fillStyle: '#AF6915'}
             }
         );
 
@@ -256,101 +256,52 @@ class GameClass {
                 friction:0,
                 inertia: Infinity,
                 render:{
-                    fillStyle: "red"
+                    fillStyle: "#AF6915"
                 }
             }
         )
-        Body.setVelocity(this.ball, {x: 5, y: 5});
+        const velocityScale = 0.01; // Adjust this value to change the speed of the ball
+        Body.setVelocity(this.ball, {x: this.width * velocityScale, y: this.height * velocityScale});
         Composite.add(this.engine.world, [this.ball, this.p1, this.p2]);
         Composite.add(this.engine.world, [...this.obstacles]);
 
     }
 
+    private updatePaddlePosition() {
+        Events.on(this.engine, 'beforeUpdate', (event : any)=>{
+            const min : number = this.normalise(paddleWidth / 2, 0, globalWidth, 0, this.width);
+            const max : number = this.width - min;
+            
+            const scale = Math.min(this.width / globalWidth, this.height / globalHeight);
+            const adjustedPaddleVitess = this.paddleVitess * scale; // Adjust the paddle velocity
 
-    // private mouseEvents(): void {
-        
-    //     // Matter.Events.on(this.engine, "beforeUpdate", (event: any) => {
-    //         let rect = this.render.canvas.getBoundingClientRect()
-    //         let x: number = this.mouse.position.x - rect.left / 2;
-    //       let min: number = this.normalise((paddleWidth / 2), 0, globalWidth, 0, this.width);
-    //       let max: number = this.width - min;
-    //       console.log("mouse x", this.mouse.position.x, "max: ", max, "min: ", min, "element: ", this.element);
+            if(this.leftPressed) {
+                const newX = this.Id === 1 ? this.p1.position.x - adjustedPaddleVitess : this.p2.position.x - adjustedPaddleVitess;
+                if (this.mod === "BOT" && newX >= min && newX <= max)Body.setPosition(this.p2, {x: newX, y: this.p2.position.y});
+                else if (this.socket && this.mod === "RANDOM")this.socket?.emit("UPDATE", {
+                    gameId: this.gameId,
+                    vec: {
+                        x: this.Id === 1 ? this.normalise(newX, 0, this.width, 0, globalWidth) : this.normalise(this.width - newX, 0, this.width, 0, globalWidth),
+                        y : this.Id === 1 ? 780: 20
+                    }
+                });
+            }
+            if(this.rightPressed) {
+                const newX = this.Id === 1 ? this.p1.position.x + adjustedPaddleVitess : this.p2.position.x + adjustedPaddleVitess;
+                if (this.mod === "BOT" && newX >= min && newX <= max)Body.setPosition(this.p2, {x: newX, y: this.p2.position.y});
+                else if (this.socket && this.mod === "RANDOM")this.socket?.emit("UPDATE", {
+                    gameId: this.gameId,
+                    vec: {
+                        x: this.Id === 1 ? this.normalise(newX, 0, this.width, 0, globalWidth) : this.normalise(this.width - newX, 0, this.width, 0, globalWidth),
+                        y : this.Id === 1 ? 780: 20
+                    }
+                });
+            }
 
-    //       if (x >= min && x <= max ) {
-    //         if (this.mod === "BOT")Body.setPosition(this.p2, {x: x, y: this.p2.position.y});
-    //         else if (this.socket && this.mod === "RANDOM"){this.socket?.emit("UPDATE", {
-    //             gameId: this.gameId,
-    //             vec: {
-    //                 x: this.Id === 1 ? this.normalise(this.mouse.position.x, 0, this.width, 0, globalWidth) : this.normalise(this.width - this.mouse.position.x, 0, this.width, 0, globalWidth),
-    //                 y : this.Id === 1 ? 780: 20
-    //             }
-    //         });console.log("UPDATE FROM FRONTE:::");
-    //         }
-    //       }
-    //     // });
-    //   }
+        })
+    }
 
-    private mouseEvents(): void {
-        Matter.Events.on(this.engine, "beforeUpdate", (event: any) => {
-          let x: number = this.mouse.position.x;
-          let min: number = this.normalise(paddleWidth / 2, 0, globalWidth, 0, this.width) - 5;
-          let max: number = this.width - min + 10;
-          // // console.log("mouse x", this.mouse.position.x);
 
-          if (x >= min && x <= max ) {
-            if (this.mod === "BOT")Body.setPosition(this.p2, {x: x, y: this.p2.position.y});
-            else if (this.socket && this.mod === "RANDOM")this.socket?.emit("UPDATE", {
-                gameId: this.gameId,
-                vec: {
-                    x: this.Id === 1 ? this.normalise(this.mouse.position.x, 0, this.width, 0, globalWidth) : this.normalise(this.width - this.mouse.position.x, 0, this.width, 0, globalWidth),
-                    y : this.Id === 1 ? 780: 20
-                }
-            });
-          }
-        });
-      }
-
-    // private mouseEvents(): void {
-    //     const paddleSpeed = 5; // Adjust this value to control the speed of the paddle
-    
-    //     Matter.Events.on(this.engine, "beforeUpdate", (event: any) => {
-    //         let rect = this.element.getBoundingClientRect();
-    //         let mouseX: number = this.mouse.position.x - rect.left;
-    //         let halfPaddleWidth = this.normalise(paddleWidth / 2, 0, globalWidth, 0, this.width);
-    //         let paddleX: number = this.p2.position.x;
-    
-    //         // Ensure the paddle stays within the canvas
-    //         if (mouseX < halfPaddleWidth) {
-    //             mouseX = halfPaddleWidth;
-    //         } else if (mouseX > this.width - halfPaddleWidth) {
-    //             mouseX = this.width - halfPaddleWidth;
-    //         }
-    //         if (this.socket && this.mod === "RANDOM") this.socket?.emit("UPDATE", {
-    //             gameId: this.gameId,
-    //             vec: {
-    //                 x: this.Id === 1 ? this.normalise(paddleX, 0, this.width, 0, globalWidth) : this.normalise(this.width - paddleX, 0, this.width, 0, globalWidth),
-    //                 y : this.Id === 1 ? 780: 20
-    //             }
-    //         });
-    
-    //         // Move the paddle towards the mouse position
-    //         if (mouseX > paddleX) {
-    //             paddleX = Math.min(paddleX + paddleSpeed, mouseX);
-    //         } else if (mouseX < paddleX) {
-    //             paddleX = Math.max(paddleX - paddleSpeed, mouseX);
-    //         }
-    
-    //         if (this.mod === "BOT") Body.setPosition(this.p2, {x: paddleX, y: this.p2.position.y});
-    //         // else if (this.socket && this.mod === "RANDOM") this.socket?.emit("UPDATE", {
-    //         //     gameId: this.gameId,
-    //         //     vec: {
-    //         //         x: this.Id === 1 ? this.normalise(paddleX, 0, this.width, 0, globalWidth) : this.normalise(this.width - paddleX, 0, this.width, 0, globalWidth),
-    //         //         y : this.Id === 1 ? 780: 20
-    //         //     }
-    //         // });
-    //     });
-    // }
-    
     private calculateScale(): number {
         let scale: number = this.width / globalWidth;
         let scale2: number = this.height / globalHeight;
@@ -386,14 +337,14 @@ class GameClass {
                     3 * this.height / 4,
                     this.normalise(100, 0, globalWidth, 0, this.width), 
                     this.normalise(10,0, globalHeight, 0, this.height), 
-                    { isStatic: true, chamfer: { radius: 5 * this.calculateScale() } , render: {fillStyle: 'red'},  label: "ADV"}
+                    { isStatic: true, chamfer: { radius: 5 * this.calculateScale() } , render: {fillStyle: '#AF6915'},  label: "ADV"}
                 ),
                 Bodies.rectangle(
                     this.width / 4, 
                     this.height / 4,
                     this.normalise(100, 0, globalWidth, 0, this.width), 
                     this.normalise(10,0, globalHeight, 0, this.height), 
-                    { isStatic: true, chamfer: { radius: 5 * this.calculateScale() } , render: {fillStyle: 'red'} , label: "ADV"}
+                    { isStatic: true, chamfer: { radius: 5 * this.calculateScale() } , render: {fillStyle: '#AF6915'} , label: "ADV"}
                 ),
             )
         else if (this.map === "INTEMIDIER")
@@ -403,7 +354,7 @@ class GameClass {
                 20 * this.calculateScale(),
                 {
                     isStatic: true,
-                    render: {fillStyle: 'blue'}
+                    render: {fillStyle: '#AF6915'}
                 }
             ), Bodies.circle(
                 3 * this.width / 4, 
@@ -411,7 +362,7 @@ class GameClass {
                 20 * this.calculateScale(), 
                 {
                     isStatic: true,
-                    render: {fillStyle: 'blue'}
+                    render: {fillStyle: '#AF6915'}
                 }
             ), Bodies.circle(
                 this.width / 4, 
@@ -419,7 +370,7 @@ class GameClass {
                 20 * this.calculateScale(),
                 {
                     isStatic: true,
-                    render: {fillStyle: 'blue'}
+                    render: {fillStyle: '#AF6915'}
                 }
             ), Bodies.circle(
                 3 * this.width / 4, 
@@ -427,7 +378,7 @@ class GameClass {
                 20 * this.calculateScale(), 
                 {
                     isStatic: true,
-                    render: {fillStyle: 'blue'}
+                    render: {fillStyle: '#AF6915'}
                 }
             ))
 
@@ -469,7 +420,7 @@ class GameClass {
     }
 
     private handleCollistion(){
-        Matter.Events.on(this.engine, "collisionStart", (event) =>{
+        Events.on(this.engine, "collisionStart", (event) =>{
             event.pairs.forEach((pair)=>{
                 const bodyA = pair.bodyA;
                 const bodyB = pair.bodyB;
@@ -481,44 +432,46 @@ class GameClass {
                     if (Math.abs(normal.x) < Threshold){
                         const sign = Math.sign(this.ball.velocity.x);
                         const i = 0.5;
-                        Body.setVelocity(this.ball, {
-                            x: Math.min(this.ball.velocity.x + sign * i , this.maxVelocity),
-                            y : this.ball.velocity.y
-                        })
-                        const restitution = 1; // Adjust this value for desired bounciness
-                        const friction = 0; // Adjust this value for desired friction
-                                        
-                                // Set restitution and friction for the ball
-                        Body.set(this.ball, { restitution, friction });
-                                
-                                // Set restitution and friction for the other body (if it's not static)
-                        const otherBody = bodyA === this.ball ? bodyB : bodyA;
-                        if (!otherBody.isStatic) {
-                            Body.set(otherBody, { restitution, friction });
-                        }
-                        if (otherBody === this.topWall || otherBody === this.downWall){
-                            if (otherBody === this.topWall) this.score1++;
-                            else this.score2++;
-                            Body.setPosition(this.ball, { x: this.width / 2, y: this.height / 2 });
-                            Body.setVelocity(this.ball, { x: this.ball.velocity.x < 0 ? 5 : -5 , y: this.ball.velocity.y > 0 ? 5:  -5});
-                        }
-                                
+                        let newVelocity : Vector = { x : Math.min(this.ball.velocity.x + sign * i , this.maxVelocity), y : this.ball.velocity.y}
+                        if (Math.abs(newVelocity.x) < 1) newVelocity.x = sign * 1; // Minimum horizontal velocity
+                        if (Math.abs(newVelocity.y) < 1) newVelocity.y = sign * 1; // Minimum vertical velocity
+                        Body.setVelocity(this.ball, newVelocity)
+                    }
+                    const otherBody = bodyA === this.ball ? bodyB : bodyA;
+                    if (otherBody === this.topWall || otherBody === this.downWall){
+                        Body.setPosition(this.ball, { x: this.width / 2, y: this.height / 2 });
+                        const velocityScale = 0.01; // Adjust this value to change the speed of the ball
+                        Body.setVelocity(this.ball, {x: this.ball.velocity.x < 0 ? this.width * velocityScale : -this.width * velocityScale, y: this.ball.velocity.y > 0 ? -this.height * velocityScale : this.height * velocityScale});
+                    }
+                    else{
+                        let newVelocity : Vector = { x : Math.min(this.ball.velocity.x + Math.sign(this.ball.velocity.x) * 0.5 , this.maxVelocity), y : this.ball.velocity.y}
+                        if ( (newVelocity.x >= -0.5 && newVelocity.x <= 0.5) ||  (newVelocity.y >= -0.5 && newVelocity.y <= 0.5))
+                            newVelocity = { x : newVelocity.x + (newVelocity.x < 0 ? -0.5: 0.5), y : this.ball.velocity.y + (newVelocity.y < 0 ? -0.5: 0.5)}
                     }
                 }            
             });
         }); 
     }
-    public getSize(){return [this.width, this.height]}
+
+
+    public  getSize(){return [this.width, this.height]}
+
+    public  setLeftPressed(value: boolean): void {
+        this.leftPressed = value;
+      }
+      
+    public  setRightPressed(value: boolean): void {
+        this.rightPressed = value;
+      }
+
     public destroyGame(){
         this.state = false;
         Runner.stop(this.runner);
         Render.stop(this.render);
-        // this.element.removeEventListener('mousemove', this.boundHandleMouseMove);
         this.render.canvas.remove();
         Engine.clear(this.engine);
-        // this.engine = Engine.create()
-        console.log("DISTROY ENGINE: ", this.gameId);
-        
+        window.removeEventListener('keydown', this.keyDownHandler);
+        window.removeEventListener('keyup', this.keyUpHandler);
     }
 }
 

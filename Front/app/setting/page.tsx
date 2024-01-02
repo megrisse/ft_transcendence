@@ -1,17 +1,17 @@
 'use client'
 import axios from "axios";
-import Navbar from "../components/Navbar"
 import Image from "next/image"
-import { FiEdit2 } from "react-icons/fi";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../store/store";
 import { PropagateLoader, GridLoader } from "react-spinners";
-import Link from "next/link";
-import {updateUser2FaValue, updateUserImage, updateUserNameValue} from '../Slices/userSlice';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from "react-spinners";
+import { FiEdit2 } from "react-icons/fi";
+import Navbar from "../components/Navbar"
+import { AppDispatch, RootState } from "../store/store";
+import {updateUser2FaValue, updateUserImage, updateUserNameValue} from '../Slices/userSlice';
 
 
 interface us {
@@ -23,37 +23,32 @@ interface us {
     avatar: string | null;
 }
 
+type formDataType = {
+  username: string;
+  checked_: boolean;
+}
+
 export default function setting() {
 
   const [tfaEnabled, setTfaEnabled] = useState<boolean>(false);
-  const checkedTFA = useSelector((state: RootState) => state.user.entity?.userData?.IsEnabled);
-  const avatar = useSelector((state: RootState) => state.user.entity?.userData?.avatar);
-  const entity = useSelector((state: RootState) => state.user.entity);
-  const loading: boolean = useSelector((state: RootState) => state.user?.loading);
-  const error: string | null = useSelector((state: RootState) => state.user?.error);
   const [loadingCode, setLoadingCode] = useState<boolean>(true);
   const [hide, setHide] = useState<boolean>(true);
   const [errorCode, setErrorCode] = useState<string | null>(null);
-  const userName: string = useSelector((state: RootState) => state.user.entity?.userData?.username) ?? '';
-  const [inputValue, setInputValue] = useState('');
-  const dispatch = useDispatch<AppDispatch>();
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
-  const isAuth = useSelector((state: RootState) => state.user.entity?.userData.isAuth);
-  const isEnab = useSelector((state: RootState) => state.user.entity?.userData.IsEnabled);
-  console.log('== is Enab = ', useSelector((state: RootState) => state.user.entity?.userData.IsEnabled));
-  console.log('== is Auth = ', useSelector((state: RootState) => state.user.entity?.userData.isAuth));
-  
-  
-  
   const [code, setCode] = useState<string>("");
-  
   const [imageD, setImageD] = useState<File | null>(null);
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    checked_: false,
-  });
+  const [formData, setFormData] = useState<formDataType>({username: '', checked_: false,});
 
+  const checkedTFA = useSelector((state: RootState) => state.user.entity?.userData?.IsEnabled);
+  const avatar = useSelector((state: RootState) => state.user.entity?.userData?.avatar);
+  const loading: boolean = useSelector((state: RootState) => state.user?.loading);
+  const error: string | null = useSelector((state: RootState) => state.user?.error);
+  const userName: string = useSelector((state: RootState) => state.user.entity?.userData?.username) ?? '';
+  const isEnab = useSelector((state: RootState) => state.user.entity?.userData.IsEnabled);
+
+  const dispatch = useDispatch<AppDispatch>();
+  
+  
   useEffect (() => {
     checkedTFA &&
     setFormData((prevData) => ({
@@ -76,68 +71,24 @@ export default function setting() {
     }));
   }, [userName])
 
-
-
-  // const uploadImage = () => {
-  // if (imageD instanceof File){  
-  //     console.log(imageD);
-  //     const formData = new FormData();
-  //     formData.append("file", imageD);
-  //     formData.append("upload_preset", "vzhhlhkm");
-  //     console.log("__________----");
-  //     console.log(formData);
-  //     console.log("__________----");
-  //     axios.post("https://api.cloudinary.com/v1_1/dlnhacgo2/image/upload", formData
-  //         ).then((res) => {console.log(res);
-  //         })
-  //   }
-  // }
-  useEffect(() => {
-    console.log('Code (inside useEffect):', code);
-   }, [code]);
-
-   console.log('Code useerName:', formData?.username);
-   console.log('Code useerName:', formData?.checked_);
-
   const hideUserInput = () => {
     setHide(!hide);
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked, files } = e.target;
-    const newUserName = document.getElementById('username') as HTMLInputElement | null
-    console.log('lllllllsss = ', newUserName?.value);
-    
-    
+    const { name, type, checked, files } = e.target;
+
     if (type === 'file' && files) {
       setImageD(files[0]);
     } else {
-      //setFormData((prevData) => ({
-        //  ...prevData,
-        //  [name]: (type === 'checkbox' && value !== '') ? checked : (name === 'username' ? prevData[name] : value),
-        //}));
-        setFormData((prevData : any) => {
+        setFormData((prevData:formDataType) => {
           if (type === 'checkbox') {
             return {
               ...prevData,
               [name]: checked,
             };
-          } else if (name === 'username' && (newUserName?.value.length as number > 0)) {
-              setInputValue(value);
-
-                return {
-                  ...prevData,
-                  [name]: newUserName?.value,
-                  
-                }
-              
-          } 
-          else {
-            return {
-              ...prevData,
-              [name]: prevData[name], 
-            }
           }
+          return prevData;
       });
     }  
   }
@@ -152,42 +103,28 @@ export default function setting() {
       formData.append('upload_preset', 'vzhhlhkm');
 
       try {
-
         const response = await axios.post(
           'https://api.cloudinary.com/v1_1/dlnhacgo2/image/upload',
           formData
         );
         
         if (response.data) {
-          console.log('Image uploaded successfully:', response.data);
           dispatch(updateUserImage(response.data.url));
           const url = response.data.url;
           const serverResponse = await axios.post('http://localhost:4000/Settings/image', {url : url}, { withCredentials: true });
-          if (serverResponse.status === 200) {
-            console.log('Second request successful:', serverResponse.data);
-          } else {
-            console.error('Second request failed:', serverResponse.data);
-          }
-        } else {
-          console.error('Image upload failed:', response);
-        }
+        } 
       } catch (error) {
-        //document.getElementById('notifyError')?.click();
-        console.error('Error uploading image:', error);
+
       }
     }
   }
 
-  const handleFormDataSubmit = async () => {
+  const handleFormDataSubmit = async (userName:string) => {
     try {
-      const response = await axios.post('http://localhost:4000/Settings/username', formData, { withCredentials: true });
-  
-      console.log('API Response:', response); 
-
+      const response = await axios.post('http://localhost:4000/Settings/username', {...formData, username:userName}, { withCredentials: true });
   
       if (response.status === 201) {
-        console.log('Data submitted successfully:', response.data);
-        dispatch(updateUserNameValue(formData.username));
+        dispatch(updateUserNameValue(userName));
         setHide(true);
         setLoadingSubmit(false);
         document.getElementById('notifySuccess')?.click();
@@ -197,9 +134,7 @@ export default function setting() {
         setLoadingCode(false);
         setCode(updatedCode);
         
-      } else {
-        console.error('Data submission failed:', response.data);
-      }
+      } 
     } catch (error) {
         setLoadingCode(false);
         setErrorCode(error as string)
@@ -215,17 +150,17 @@ export default function setting() {
       setTfaEnabled(true);
     }
     setLoadingSubmit(true);
-    //console.log("checked = ", formData?.checked_ );
     await handleImageUpload();
-    if (formData?.checked_ || formData?.username.trim().length > 0){
-      await handleFormDataSubmit();
+    const userNam = (document.getElementById('username') as HTMLInputElement).value;
+    if(userNam.trim().length > 0){
+      await handleFormDataSubmit(userNam.trim());
     }
-    //await handleFormDataSubmit();
-    setInputValue('');
+    else{
+      await handleFormDataSubmit(userName);
+    }
   }
 
   const onCloseClick = () => {
-    console.log("close Click");
     setTfaEnabled(false);
   }
 
@@ -240,7 +175,6 @@ export default function setting() {
     )
   }
   const notifySuccess = () => {
-    console.log('notify');
     toast.success('Profile updated successfuly.', {
       position:"top-right",
       autoClose: 2000,
@@ -288,7 +222,7 @@ export default function setting() {
                   <div className={`${hide ? 'hidden' : 'flex'} py-4 justify-between xMedium:h-[5rem] xMedium:text-2xl Large:h-24 h-16 w-[400px] mx-auto  xMedium:min-w-[500px] rounded-3xl bg-[#323232]`}>
                       <div className="text-[#E58E27] text-xl xMedium:text-2xl m-auto">New one  </div>
                       <div className="m-auto bg-[#e28888]">
-                        <input onChange={handleChange} value={inputValue} id="username" name="username" type="text" className="border-none placeholder-slate-400 bg-[#323232] outline-0 w-[160px] text-xl xMedium:text-2xl" />
+                        <input  id="username" name="username" type="text" className="border-none placeholder-slate-400 bg-[#323232] outline-0 w-[160px] text-xl xMedium:text-2xl" />
                       </div>
                   </div>
                   <div className="flex py-4 justify-between xMedium:h-[5rem] xMedium:text-2xl Large:h-24 h-16 w-[400px] mx-auto  xMedium:min-w-[500px] rounded-3xl bg-[#323232]">
@@ -297,15 +231,10 @@ export default function setting() {
                         <button className="">
                           <label htmlFor="toggleCheck" data-modal-target="timeline-modal" data-modal-toggle="timeline-modal" className="w-[180px] h-20">
                           <input onChange={handleChange} type="checkbox" id="toogleCheck" name="checked_" checked={formData?.checked_} className="h-8 rounded-full appearance-none w-16 bg-slate-500 opacity-80 checked:bg-slate-200 transition duration-300 relative" />
-
-                            {/* <button  id="toogleCheck" name="checked_"  className="h-8 rounded-full appearance-none w-16 bg-slate-500 opacity-80 checked:bg-slate-200 transition duration-300 relative" onClick={handletfaClick }/> */}
-                            {/* <span className="w-5 h-5 bg-red-400 rounded-full absolute top-1 left-1"></span>
-                            <span className="w-20 h-10 bg-slate-400 rounded-full absolute top-1 left-11"></span> */}
                           </label>
                         </button>
                       </div>
                   </div>
-                  {/* <button type="submit" className="xMedium:h-[5rem] py-6 Large:h-24 h-16 w-[400px] mx-auto  xMedium:min-w-[500px] border-x-2 border-[#E58E27] rounded-3xl bg-[#323232] text-slate-100 text-xl xMedium:text-2xl hover:bg-[#E58E27] hover:opacity-80 transition duration-700">SAVE</button> */}
                   {loadingSubmit ? (<button className="xMedium:h-[5rem] py-6 Large:h-24 h-16 w-[400px] mx-auto  xMedium:min-w-[500px] border-x-2 border-[#E58E27] rounded-3xl bg-[#323232]  text-xl xMedium:text-2xl hover:opacity-80 transition duration-700"><ClipLoader className="text-white" color={"#E58E27"} loading={loadingSubmit} size={30} aria-label="Loading Spinner" /></button>) : (<button type="submit" data-modal-target="timeline-modal" data-modal-toggle="timeline-modal" className="xMedium:h-[5rem] py-6 Large:h-24 h-16 w-[400px] mx-auto  xMedium:min-w-[500px] border-x-2 border-[#E58E27] rounded-3xl bg-[#323232] text-slate-100 text-xl xMedium:text-2xl hover:bg-[#E58E27] hover:opacity-80 transition duration-700">Validate</button>)}
                   {/* Pop-up */}
                   <div id="timeline-modal"  aria-hidden="true" className={` ${(tfaEnabled && isEnab && formData?.checked_) ? "" : "hidden"} overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}>
@@ -328,19 +257,13 @@ export default function setting() {
                                           (
                                             loadingCode ? (<div><h3>LOADING ...</h3>
                                             <div><GridLoader color={"#E58E27"} loading={loadingCode} size={10} aria-label="Loading Spinner" /></div></div>) : (<img src={code} alt="Your Image" className=" w-52 h-52 rounded-lg border"/>)
-                                          ) : (<h1>zebi la dkhelti</h1>)}
-                                        {/* {loadingCode ? <h3>LOADING ...</h3> : <div></div>}
-                                        {loadingCode ? (<div><GridLoader color={"#E58E27"} loading={loadingCode} size={10} aria-label="Loading Spinner" /></div>) :
-                                          (<img src={code} alt="Your Image" className=" w-52 h-52 rounded-lg border"/>)  }      
-                                          {
-                                            !code ? (<h1>zebi la dkhelti</h1>) : (<div></div>)
-                                          }                                    */}
+                                          ) : (<h1 className="text-center">the QR code is already generated, click the button below to validate it</h1>)}
                                       </div>
                                       {
                                         code ? (<button className="text-white inline-flex w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                                         <Link href={'/2FaValidation'}> VERIFY </Link>
                                       </button>) : (<button className="text-white inline-flex w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                                        <Link href={'/2FaValidation'}> Valider oula khrej t9awed </Link>
+                                        <Link href={'/2FaValidation'}> Validate </Link>
                                       </button>)
                                       }
                                       
@@ -365,7 +288,7 @@ export default function setting() {
                 theme="dark"/>     
               </div>
               <div className=" xMedium:min-w-[500px] w-[600px] hidden medium:block">
-                <Image className='' alt='' src={'/pingPaddles.png'} height={1200} width={1200}/>
+                <Image className='' alt='' src={'/pingPaddles.png'} height={1200} width={1200} priority/>
                 
               </div>
             </div>

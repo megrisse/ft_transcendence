@@ -40,10 +40,6 @@ export default function UserProvider ({children}: userProviderProps){
     });
 
     const test = (user: User) => {
-        console.log('yes im in the pooker face');
-        console.log(user);
-        
-        
         setUser(user)
     }
     

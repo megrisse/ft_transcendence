@@ -1,18 +1,34 @@
 'use client'
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import ChanSetting from "../components/channelsComponents/chanSetting";
 import Navbar from "../components/Navbar";
 import { useSelector } from 'react-redux';
-import { RootState } from '../store/store';
+import { RootState, useAppDispatch } from '../store/store';
 import { PropagateLoader } from 'react-spinners';
+import { fetchChannelSetData, setSelectedChannel } from '../Slices/channelSlice';
 
 
 export default function Page() {
-
+ 
       const fetloading: boolean = useSelector((state: RootState) => state.channel.fetchloading);
       const feterror: string | null = useSelector((state: RootState) => state.channel.fetcherror);
+      const dispatch = useAppDispatch()
 
+      useEffect(()=> {
+        dispatch(fetchChannelSetData());
+      },[])
+      // const dispatch = useAppDispatch();
+      // useEffect(() => {
+      //     dispatch(fetchChannelSetData());
+      //     dispatch(setSelectedChannel({
+      //       admins : [],
+      //       users : [],
+      //       bandUsers : [],
+      //       mutedUsers : [],
+      //       channelName: ''
+      //     }));
+      // },[])
       if (fetloading || feterror){
        return (
          <div className="text-white flex flex-col justify-center items-center w-full h-[70%] xMedium:h-screen">

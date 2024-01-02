@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useAppDispatch } from "../store/store";
 import { Action } from "../Slices/userSettingsSlice";
+import { Socket } from "socket.io-client";
 
 
 type ModalType = {
     content : string;
     title : string;
+    socket: Socket;
 };
 
 type bodyData = {
@@ -21,7 +23,6 @@ const Modal = (props: ModalType) => {
     const handleChange = (event: any) => {
       setMessage(event.target.value);
   
-      console.log('value is:', event.target.value);
     };
     let alert : string = "";
     let bodyData : bodyData = {
@@ -31,6 +32,11 @@ const Modal = (props: ModalType) => {
       setShowModal(false);
       if (!endpoint)
       return
+      if (endpoint === "invite") {
+        // setTimeout(() => {
+          props.socket.emit("invite", {"username": bodyData.username})
+        // }, 500);
+      }
       dispatch(Action({endpoint : endpoint, bodyData : bodyData}));
     }
   let myMap = new Map<string, string>();

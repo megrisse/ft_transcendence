@@ -37,8 +37,7 @@ export default function Pra() {
           <div className="flex flex-col xMedium:flex-row w-[100%] m-auto items-center xMedium:w-full medium:h-[40%] xMedium:h-[35%] xLarge:h-[45%] Large:h-[38%] rounded-lg medium:mb-2 mx-auto">
             <div className="min-w-[30%] w-72 h-[70%] medium:h-[45%]">
               <div className="grid h-full w-full content-center relative">
-                {<Image className='rounded-full border-4 mx-auto w-40 h-40 xMedium:w-36 xMedium:h-36 Large:w-56 Large:h-56 border-[#E58E27]' alt='userImage' src={dataUser?.avatar || "/noBadge.png"} height={150} width={150}/>}
-                {/* <Image className='shadow-neon-light' layout="fill" objectFit="contain" src={'/gsus.jpeg'} alt="PING PONG" /> */}
+                {<Image className='rounded-full border-4 mx-auto w-40 h-40 xMedium:w-32 xMedium:h-32 Large:w-40 Large:h-40 border-[#E58E27]' alt='userImage' src={dataUser?.avatar || "/noBadge.png"} height={150} width={150} priority/>}
                 <div className="absolute xMedium:w-full top-36 left-52 medium:top-32 xMedium:left-12 xMedium:top-36 Large:top-44 xLarge:top-48 xLarge:left-20">
                   <Link href={"/setting"} className="flex items-end">
                     <div className=" py-2 xMedium:py-0 xMedium:px-1 text-2xl text-[#E58E27]"><FaUserEdit /></div>

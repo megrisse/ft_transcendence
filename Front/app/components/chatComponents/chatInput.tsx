@@ -17,9 +17,6 @@ export interface chatInputProps {
 function ChatInput({onSendMessage, conversation, senderId, receiverId}: chatInputProps) {
   const [message, setMessage] = useState<string>('');
 
-  console.log('receiverid = ', receiverId);
-  console.log('senderid = ', senderId);
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
   };
@@ -33,7 +30,6 @@ function ChatInput({onSendMessage, conversation, senderId, receiverId}: chatInpu
 
   const handleSendMessage = () => {
     if (message.trim() !== '') {
-      console.log("sender , ", senderId, ", reciever , " , receiverId);
       
       socket.emit('SendMessage', {
         "content" : message,

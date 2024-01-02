@@ -17,9 +17,7 @@ const BotComponent : React.FC<BotMap> = (prop) => {
     
     useEffect(() => {
         if (gameDiv && gameDiv.current)
-            { game = new GameClass(gameDiv.current, prop.map, "BOT", "BOT"); console.log("GAMECLASS"); }
-        console.log("offs: ", gameDiv.current?.offsetTop);
-        
+            game = new GameClass(gameDiv.current, prop.map, "BOT", "BOT")
         return () => {
             if (game)
                 game.destroyGame();
@@ -34,7 +32,22 @@ const BotComponent : React.FC<BotMap> = (prop) => {
                 </div>
                 <div 
                     ref={gameDiv} 
-                    className="flex w-[60%] h-[60%] justify-center bg-white">
+                    className="relative flex w-[90%] h-[50%] medium:w-[60%] medium:h-[60%] justify-center"
+                >
+                    <div 
+                        className="absolute inset-y-0 left-0 w-1/2 h-full opacity-0 bg-yellow-500"
+                        onMouseDown={() => game?.setLeftPressed(true)}
+                        onMouseUp={() => game?.setLeftPressed(false)}
+                        onTouchStart={() => game?.setLeftPressed(true)}
+                        onTouchEnd={() => game?.setLeftPressed(false)}
+                    />
+                    <div 
+                        className="absolute inset-y-0 right-0 w-1/2 h-full opacity-0"
+                        onMouseDown={() => game?.setRightPressed(true)}
+                        onMouseUp={() => game?.setRightPressed(false)}
+                        onTouchStart={() => game?.setRightPressed(true)}
+                        onTouchEnd={() => game?.setRightPressed(false)}
+                    />
                 </div>
                 <div className="flex flex-col items-center justify-start">
                      <Score avatar={prop.avatar} name={prop.name} score={Infinity} />

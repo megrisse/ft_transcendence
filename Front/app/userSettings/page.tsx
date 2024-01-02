@@ -1,14 +1,18 @@
 'use client'
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "../components/Navbar";
 import UserSettings from "./userSettings";
 import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
+import { RootState, useAppDispatch } from "../store/store";
 import { PropagateLoader } from "react-spinners";
+import { fetchUserSettings } from "../Slices/userSettingsSlice";
+
 
 export default function SettingsForUser() {
-  
-
+  const dispatch = useAppDispatch();
+  useEffect(()=> {
+    dispatch(fetchUserSettings());
+  },[])
   const loading: boolean = useSelector((state: RootState) => state.setuser.loading);
   const error: string | null = useSelector((state: RootState) => state.setuser.error);
 

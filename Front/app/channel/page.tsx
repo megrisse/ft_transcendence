@@ -1,15 +1,19 @@
 'use client';
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "@/app/components/Navbar";
 import ChannelChat from "./channels.client";
-import { RootState } from "../store/store";
+import { RootState, useAppDispatch } from "../store/store";
 import { useSelector } from "react-redux";
 import { PropagateLoader } from "react-spinners";
+import { fetchChannelData } from "../Slices/channelMessagesSlice";
 
 export default function Channels() {
   const loading: boolean = useSelector((state: RootState) => state.channelMessages.loading);
   const error: string | null = useSelector((state: RootState) => state.channelMessages.error);
-
+  const dispatch = useAppDispatch()
+  useEffect(()=> {
+        dispatch(fetchChannelData())
+    },[]);
   if (loading || error){
     return (
       <div className="text-white flex flex-col justify-center items-center w-full h-[70%] xMedium:h-screen">
@@ -22,9 +26,9 @@ export default function Channels() {
   }
 
     return (
-        <div className="flex flex-col text-slate-100 min-h-screen w-full">
-                <div className="h-16 mb-7 w-full Large:h-24 truncate"><Navbar pageName="Channel Chat" /></div>
-                <div className=" h-screen"><ChannelChat/></div>
+        <div className="flex flex-col justify-between items-center h-screen min-h-screen w-full min-w-screen">
+                <div className="h-16 mb-7 w-full Large:h-24 "><Navbar pageName="Channel Chat" /></div>
+                <div className=" h-[90%] w-full xMedium:w-[90%]"><ChannelChat/></div>
         </div>
       )
     }

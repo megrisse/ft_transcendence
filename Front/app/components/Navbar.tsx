@@ -16,8 +16,6 @@ interface userr {
   username: string
 }
 
-
-
 export default function Navbar({pageName}:Props) {
   
   const usersData = [
@@ -32,7 +30,6 @@ export default function Navbar({pageName}:Props) {
   const [hideIt, setHideIt] = useState<boolean>(false);
   const [loadingCode, setLoadingCode] = useState<boolean>(false);
   const [errorCode, setErrorCode] = useState<string | null>(null);
-  const sortedUsersData = usersData.slice().sort((a, b) => a.name.localeCompare(b.name));
   const [userData, setUserData] = useState<userr[]>([]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,10 +38,8 @@ export default function Navbar({pageName}:Props) {
   };
   
   useEffect(() => {
-    console.log("nav UseEffect")
     const fetchUserData = async () => {
       try {
-        console.log("searcg input length = ", searchInput.length);
         if (searchInput.length === 0)
           setLoadingCode(false);
         if (searchInput.trim().length === 0)
@@ -52,33 +47,26 @@ export default function Navbar({pageName}:Props) {
 
         if (searchInput.trim().length > 0) {
           const response = await axios.get(`http://localhost:4000/Search/${searchInput}`, {withCredentials: true });
-          console.log('nav bar Data')
           setLoadingCode(false);
           setUserData(response.data);
         }
       } catch (error) {
-        console.log("Error nav bar")
         setLoadingCode(false);
         setErrorCode(error as string)
-        console.error('Error fetching user data:', error);
       }
     };
     fetchUserData();
-   
     
   }, [searchInput]);
 
-  //let filteredUsers = searchInput ? sortedUsersData.filter((user) =>
-  //  user.name.toLowerCase().includes(searchInput.toLowerCase())
-  //)  : [];
   return (
-    <div className='flex justify-between medium:min-w-[400px] h-16 Large:h-24 mx-6'>
+    <div className='flex justify-between min-w-[350px] h-16 Large:h-24 mx-6'>
       <div className='flex w-[50%] text-[#E58E27] items-center justify-around'>
-        <h3 className='pr-3 ml-7 medium:ml-3 Large:text-xl'>{pageName}</h3>
+        <h3 className='ml-7 medium:ml-3 text-sm Large:text-xl w-28 whitespace-normal overflow-auto'>{pageName}</h3>
         <div className='relative h-full w-full'>
           <div>
-            <input maxLength={13} type='text' name={searchInput} onChange={handleSearch} className={`${hideIt ? "w-[270px]" : "hidden"} medium:block top-[18px] absolute Large:top-7 text-orange-100 pl-1 py-1 text-sm focus:outline-none Large:w-[400px] w-52 Large:text-lg medium:w-[300px] border rounded-lg bg-transparent border-[#E58E27]`}></input>
-            <ul className={` overflow-y-auto scrollbar-hide max-h-48 list-none p-1 m-0 absolute top-[52px] text-sm Large:w-[400px] w-[270px] Large:text-lg medium:w-[300px] ${searchInput && userData.length > 0 ? "" : "hidden"} ${searchInput && userData.length > 0 ? "" : "bg-opacity-0"} border-t-0 rounded-b-lg bg-opacity-80 z-50 bg-[#323232] border-[#E58E27]`}>
+            <input maxLength={13} type='text' name={searchInput} onChange={handleSearch} className={`${hideIt ? "w-[220px]" : "hidden"} bg-red-900 medium:block top-[18px] absolute Large:top-7 text-orange-100 pl-1 py-1 text-sm focus:outline-none Large:w-[400px] w-52 Large:text-lg medium:w-[300px] border rounded-lg bg-transparent border-[#E58E27]`}></input>
+            <ul className={` overflow-y-auto scrollbar-hide max-h-48 list-none p-1 m-0 absolute top-[52px] text-sm Large:w-[400px] w-[220px] Large:text-lg medium:w-[300px] ${searchInput && userData.length > 0 ? "" : "hidden"} ${searchInput && userData.length > 0 ? "" : "bg-opacity-0"} border-t-0 rounded-b-lg bg-opacity-80 z-50 bg-[#323232] border-[#E58E27]`}>
               {userData &&  userData?.length === 0 ? (<li></li>) :
               (userData?.map((user) => (
                 <li
@@ -93,11 +81,11 @@ export default function Navbar({pageName}:Props) {
             </ul>
           </div>
           {!loadingCode ? (<div className='hidden medium:block absolute top-5 left-[240px] Large:left-[368px] medium:left-[270px] text-2xl Large:top-8 Large:text-3xl'><AiOutlineSearch/></div>) : (<ClipLoader className='absolute Large:top-8 top-6 left-[240px] Large:left-[368px] medium:left-[270px] text-2xl Large:text-3xl' color={"#E58E27"} loading={loadingCode} size={20} aria-label="Loading Spinner" />)}
-          <button onClick={() => setHideIt(!hideIt)} className={`absolute top-5 ${hideIt ? "left-[180px]" : "left-[5px]"} Large:left-[368px] medium:hidden left-[240px] text-2xl Large:text-3xl`}><AiOutlineSearch/></button>
+          <button onClick={() => setHideIt(!hideIt)} className={`absolute top-5 ${hideIt ? "left-[190px]" : "left-[5px]"} left-5 Large:left-[368px] medium:hidden text-2xl Large:text-3xl`}><AiOutlineSearch/></button>
         </div>
       </div>
       <div className='flex w-[40%] text-[#E58E27] justify-end items-center'>
-        <Link href={'/'}><h1 className={`${hideIt ? "hidden medium:block" : ""} text-[#E58E27] mr-2 md:mr-8 font-sans medium:text-md font-semibold flex-none Large:text-xl`}>AREA 420</h1></Link>
+        <Link href={'/profile'}><h1 className={`${hideIt ? "hidden medium:block" : ""} text-[#E58E27] text-sm mr-2 md:mr-8 font-sans medium:text-md font-semibold flex-none Large:text-xl`}>AREA 420</h1></Link>
         <Link href={'/game'} className="medium:py-1 medium:px-6 Large:px-8 bg-[#E58E27] text-sm text-slate-100 rounded-full medium:rounded-sm flex-none Large:text-lg  ml-8">
           <div className='hidden medium:block'>PLAY</div>
           <div className='text-3xl rounded-full medium:hidden'><BsFillPlayCircleFill/></div>

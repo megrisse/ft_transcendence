@@ -20,19 +20,20 @@ const Man = ()=>{
 			<>
 			<div className="flex flex-col justify-center w-[60%] h-[80%] items-center overflow-x-hidden overflow-y-auto fixed inset-50 z-50 outline-none focus:outline-none">
 				<div className=" border-0 rounded-lg shadow-lg relative  w-full bg-black outline-none focus:outline-none">
-					<div className=" justify-between p-5 border-b border-solid border-gray-300 rounded-t ">
+					<div className="flex justify-between p-5 border-b border-solid border-gray-300 rounded-t ">
 						<h3 className="text-3xl font=semibold">MAN</h3>
 						<button
-						className=""
+						className="flex justify-center items-center pb-1 rounded-full bg-gray-400 h-6 w-6"
 						onClick={() => setShowModal(false)}
 						>
-							<span className="text-black opacity-7 h-6 w-6 text-xl block bg-gray-400 py-0 rounded-full">
+							<span className="text-black opacity-7 text-xl">
 							x
 							</span>
 						</button>
 					</div>
 					<div className="relative p-6 flex flex-col justify-center items-center">
-                        <div><h2>Move the Mouse inside the game to play</h2></div>
+                        <div><h2>You can play with LEFT and RIGHT Buttons in Keyboard </h2></div>
+                        <div><h2>You can play with click in left and right in Game </h2></div>
                         <div><h2>You can Play with RAndom connected Users when clicking on Play With Random</h2></div>
                         <div><h2>You can choose between 3 Mods "BEGIINER" , "INEMIDIER" And "ADVENCED"</h2></div>
                         <div><h2>You can Play with Bot, Have Fun Training ...</h2></div>

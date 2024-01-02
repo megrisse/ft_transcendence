@@ -8,6 +8,6 @@ COPY . .
 
 RUN npm i
 
-RUN npm run build
+RUN chmod +x script.sh
 
-CMD ["npm", "run", "start"]
+CMD ["sh", "./script.sh"]

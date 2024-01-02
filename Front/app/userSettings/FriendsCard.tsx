@@ -1,9 +1,10 @@
 import Modal from "../components/modal"
-import React from "react";
+import React, { useEffect } from "react";
 import { RootState, useAppDispatch } from "../store/store";
-import { Action } from "../Slices/userSettingsSlice";
+import { Action, fetchUserSettings } from "../Slices/userSettingsSlice";
 import { useSelector } from "react-redux";
 import Link from "next/link";
+import { Socket } from "socket.io-client";
 
 
 type friends = {
@@ -11,11 +12,12 @@ type friends = {
   online : boolean;
   inGame : boolean;
   id    : string;
+  socket : Socket;
 }
 
 type CardData = {
-    user : string;
     title : string;
+    socket : Socket;
 };
 
 type bodyData = {
@@ -25,24 +27,32 @@ type bodyData = {
 function FriendsCard(props : CardData) {
     const dispatch = useAppDispatch();
     const data : friends[] = useSelector((state: RootState) => state.setuser.entity?.friends) as friends[]
+    const user : string = useSelector((state: RootState) => state.setuser.entity?.user) as string
     function handleClick(endpoint: string | undefined, username: string) {
         if (!endpoint)
           return
         const bodyData : bodyData = {
           username : username,
         }
-        console.log(`http://localhost:4000/Chat/${endpoint}`);
         dispatch(Action({endpoint : endpoint, bodyData : bodyData}));
       }
       let myMap = new Map<string, string>();
       myMap.set("Friends","removeFriend");
-      console.log("data in userSettings : ", data);
-      
+      useEffect(()=> {
+        props.socket.on("invite", (username : string)=> {
+          setTimeout(() => {
+            dispatch(fetchUserSettings());
+          }, 200);
+        });
+        return ()=> {
+          props.socket.off("invite");
+        }
+       },[props.socket])
     return (
         <div className="w-[80%] md:w-1/4 h-[30%] flex flex-col m-5 p-5 items-center rounded-md bg-[#323232]">
             <div className="w-full flex flex-row justify-around ">
                 <h3>{props.title}</h3>
-                {props.title != "Friends" && <Modal content="+" title={props.title}/>}
+                {props.title != "Friends" && <Modal content="+" title={props.title} socket={props.socket}/>}
             </div>
             <div className=" w-full h-[10%] flex flex-col">
              {data  && data?.map((user, index)=> {

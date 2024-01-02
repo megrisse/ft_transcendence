@@ -23,21 +23,15 @@ const RandomButtons : React.FC<RandomButtonsProps> = (props)=>{
   ];
 
     const handleMap = (value: string) => {
-		
 		setMap(value);
-		console.log("----> aaaa", value);
-
     };
 
     const Submit = ()=>{
-		console.log("SUBMIT", socket.id, "MAP: ", map);
-		
 		socket.emit("RANDOM", {
 			map: map,	
 		})
 		props.setMap(map)
 		setMap(map);
-		console.log("MAP: ", map);
 		setShowModal(false);
 	}
 
@@ -52,15 +46,15 @@ const RandomButtons : React.FC<RandomButtonsProps> = (props)=>{
 		  </button>
 		  {showModal ? (
 			<>
-			<div className="flex flex-col justify-center w-[60%] h-[80%] items-center overflow-x-hidden overflow-y-auto fixed inset-50 z-50 outline-none focus:outline-none">
-				<div className=" border-0 rounded-lg shadow-lg relative  w-full bg-black outline-none focus:outline-none">
-					<div className=" justify-between p-5 border-b border-solid border-gray-300 rounded-t ">
+			<div className="flex flex-col justify-center w-[60%] min-h-[300px] h-[80%] items-center overflow-x-hidden overflow-y-auto absolute inset-50 z-50 outline-none focus:outline-none">
+				<div className="border-0 rounded-lg overflow-x-hidden overflow-y-auto shadow-lg relative  w-full bg-black outline-none focus:outline-none">
+					<div className="flex  justify-between  p-5 border-b border-solid border-gray-400 rounded-t">
 						<h3 className="text-3xl font=semibold">Play With Randoms</h3>
 						<button
-						className=""
+						className="flex justify-center items-center pb-1 rounded-full bg-gray-400 h-6 w-6"
 						onClick={() => setShowModal(false)}
 						>
-							<span className="text-black opacity-7 h-6 w-6 text-xl block bg-gray-400 py-0 items-end rounded-full">
+							<span className="text-black opacity-7 text-xl">
 							x
 							</span>
 						</button>
@@ -108,42 +102,3 @@ const RandomButtons : React.FC<RandomButtonsProps> = (props)=>{
 };
 
 export default RandomButtons;
-
-
-// import React, { useState } from 'react';
-// import { List, ListItem, Typography } from '@material-ui/core';
-// // import gameMode1 from '/_next/image?url=%2Fbatman.png&w=3840&q=75';
-// // import gameMode2 from './path-to-game-mode-2-image';
-// // import gameMode3 from './path-to-game-mode-3-image';
-
-// const RandomButtons = () => {
-  // const [gameMode, setGameMode] = useState("");
-
-  // // Define an array of game modes
-  // const gameModes = [
-  //   // { id: 1, name: 'Game Mode 1', image: gameMode1 },
-  //   // { id: 2, name: 'Game Mode 2', image: gameMode2 },
-  //   // { id: 3, name: 'Game Mode 3', image: gameMode3 },
-  // ];
-
-//   const handleClick = (mode: React.SetStateAction<string>) => {
-//     console.log(`Selected game mode: ${mode}`);
-//     setGameMode(mode);
-//   };
-
-//   return (
-//     <div>
-//       <Typography variant="h6">Select a game mode:</Typography>
-//       <List>
-//         {/* {gameModes.map((mode) => (
-//           <ListItem button key={mode.id} onClick={() => handleClick(mode.name)}>
-//             <img src={mode.image} alt={mode.name} />
-//           </ListItem>
-//         ))} */}
-//       </List>
-//       {gameMode && <Typography variant="h6">Selected Game Mode: {gameMode}</Typography>}
-//     </div>
-//   );
-// };
-
-// export default RandomButtons;

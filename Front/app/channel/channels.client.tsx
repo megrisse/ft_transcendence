@@ -31,16 +31,13 @@ function ChannelChat() {
   const [channelToRender, setChannelData] = useState<channelConversation>({ channelName: "", messages: [] });
   const [ChoosenChannel, SetChoosenChannel] = useState<string>();
   const [inputValue, setInputValue] = useState('');
-  const [redirecting, setRedirection] = useState<boolean>(false);
   const dispatch = useDispatch<AppDispatch>();
   let channelData: channelNames = useSelector((state: RootState) => state.channelMessages.entity);
   const loading: boolean = useSelector((state: RootState) => state.channelMessages.loading);
   const error: string | null = useSelector((state: RootState) => state.channelMessages.error);
-  console.log('error chat = ', error);
  
 
   const handleChannelMessage = useCallback((res : channelMessages) => {
-    console.log(res);
     dispatch(addMessageToChannel(res));
     setChannelData((prevChannelData) => {
       return { ...prevChannelData, messages: [...prevChannelData.messages, res] };
@@ -60,17 +57,12 @@ function ChannelChat() {
   useEffect (() => {
       if (!socket.hasListeners("channelMessage")) {
         socket.on("channelMessage", handleChannelMessage);
-        console.log("current data : ", channelData);
       }
   }, [socket]); 
-  // useEffect(() => {
-  //   dispatch(fetchChannelData());
-  // }, [dispatch]);
- 
+  
   useEffect(() => {
     const channelToRender = channelData.channels.find(channel => channel.channelName === ChoosenChannel) || { channelName: "", messages: [] };
     setChannelData(channelToRender);
-    console.log("channel to render : ",channelToRender);
   }, [channelData, ChoosenChannel]);
   
 
@@ -90,7 +82,6 @@ function ChannelChat() {
       body: JSON.stringify({"_channel" : name})
     })
     const data : channelConversation = await response.json() as channelConversation;
-    console.log("data : ", data);
     dispatch(updateChannelMessages({ channelName: name, messages: data}));
     SetChoosenChannel(name);
   }
@@ -105,30 +96,30 @@ function ChannelChat() {
     )
   }
  return (
-    <div className="relative h-[80%] w-full flex flex-col md:flex-row items-center justify-around p-5">
-      <div className=' w-[60%] h-[40%] md:h-[90%] md:w-[30%]  flex flex-col items-center rounded-lg border border-[#E58E27] '>
-        <div className='flex flex-row'>
+    <div className="relative h-[100%] w-full flex flex-col md:flex-row items-center justify-between p-5 min-h-[400px] gap-5">
+      <div className=' w-[60%] h-[40%] md:h-[90%] md:w-[30%]  flex flex-col items-center rounded-lg border border-[#323232] min-w-[300px]'>
+        <div className='flex items-center justify-between rounded-t-lg bg-[#323232] w-full h-20 p-4 border-b border-b-[#E58E27]'>
           <h3 className='p-4 flex-start'>conversations</h3>
           <ChannelSearch />
         </div>
            <div className='w-full h-full text-white flex flex-col items-center overflow-y-auto scrollbar-hide '>
               {channelData && channelData.channels.map((channel, index) => {
                return (
-               <div className='w-full text-center bg-[#E58E27] bg-opacity-50 p-2 rounded-lg m-2 border border-[#E58E27]' key={index} style={{cursor: 'pointer'}} onClick={() => handleClick(channel.channelName)}>{channel.channelName}</div>
+               <div className='w-full text-center bg-[#E58E27] bg-opacity-50 p-2 rounded-lg m-2 border-2 border-[#E58E27] ' key={index} style={{cursor: 'pointer'}} onClick={() => handleClick(channel.channelName)}>{channel.channelName}</div>
              );
            })}
            </div>
         </div>
 
-    <div className='overflow-hidden w-[90%]  h-[90%] flex flex-col items-center rounded-lg border border-[#E58E27] relative '>
-        {ChoosenChannel && <div className='w-full flex flex-row justify-between text-center border border-[#E58E27]'>
-          <h3 className='p-4'>{ChoosenChannel}</h3>
-           <button className='m-2 p-2 rounded-lg border border-[#E58E27]' onClick={()=> {handlLeave()}} >Leave</button>
+    <div className='overflow-hidden h-[90%] md:w-[80%] w-[60%]  md:h-[90%] flex flex-col items-center rounded-lg border-2 border-[#323232] relative min-w-[300px]'>
+        {ChoosenChannel && <div className='w-full flex justify-between items-center text-center h-20 bg-[#323232] border-b border-b-[#E58E27]'>
+          <h3 className='px-3'>{ChoosenChannel}</h3>
+           <button className='mr-2 py-2 px-5 items-center rounded-lg border border-[#E58E27]' onClick={()=> {handlLeave()}} >Leave</button>
         </div>}
         <div className='w-full h-[80%] flex flex-col overflow-y-auto scrollbar-hide'>
         {channelToRender && Array.isArray(channelToRender.messages) && channelToRender.messages.map((channel, index) => (
           <div key={index} className={`flex flex-row max-w-[600px] rounded-lg p-2 m-4 text-ellipsis ${channel.sender === channelData.username ? ' bg-[#E58E27] self-start flex-start bg-opacity-50' : ' bg-[#323232] self-end justify-end bg-opacity-50'}`}>
-                <Link href={`/profile/${channel.userId}`}><p>{channel?.sender}</p></Link>
+                <Link href={channel.sender === channelData.username ? '/profile' : `/profile/${channel.userId}`}><p>{channel?.sender}</p></Link>
                 <p className='break-all'>  : {channel?.content}</p>
           </div>
         ))}
@@ -140,7 +131,7 @@ function ChannelChat() {
          onChange={(e) => setInputValue(e.target.value)}
        />
        <button 
-      className="w-1/10 bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+      className="w-1/10 bg-[#E58E27] hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
       onClick={() => {
       const newMessage = {
         sender: "",
@@ -148,6 +139,7 @@ function ChannelChat() {
         channelName: ChoosenChannel,
       };
      socket.emit('channelMessage', newMessage);
+     setInputValue('');
   }}>
      Send
   </button>

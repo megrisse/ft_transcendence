@@ -26,19 +26,14 @@ const BotButtons : React.FC<BotButtonsProps> = (props) => {
     const handleMap = (value: string) => {
 		
 		setMap(value);
-		console.log("----> aaaa", value);
 
     };
 
     const Submit = ()=>{
-		console.log("SUBMIT :", "MAP: ", map);
-		
 		props.setMap(map)
 		setShowModal(false);
         props.setShowBotGame(true)
 		setMap(map);
-        
-		console.log("MAP: ", map);
 	}
 
 	return (
@@ -52,15 +47,15 @@ const BotButtons : React.FC<BotButtonsProps> = (props) => {
 		  </button>
 		  {showModal ? (
 			<>
-			<div className="flex flex-col justify-center w-[60%] h-[80%] items-center overflow-x-hidden overflow-y-auto fixed inset-50 z-50 outline-none focus:outline-none">
-				<div className=" border-0 rounded-lg shadow-lg relative  w-full bg-black outline-none focus:outline-none">
-					<div className=" justify-between p-5 border-b border-solid border-gray-300 rounded-t ">
+			<div className="flex flex-col justify-center w-[60%] min-h-[300px] h-[80%] items-center overflow-x-hidden overflow-y-auto absolute inset-50 z-50 outline-none focus:outline-none">
+				<div className="border-0 rounded-lg overflow-x-hidden overflow-y-auto shadow-lg relative  w-full bg-black outline-none focus:outline-none">
+					<div className="flex  justify-between  p-5 border-b border-solid border-gray-400 rounded-t">
 						<h3 className="text-3xl font=semibold">Play With Bot</h3>
 						<button
-						className=""
+						className="flex justify-center items-center pb-1 rounded-full bg-gray-400 h-6 w-6"
 						onClick={() => setShowModal(false)}
 						>
-							<span className="text-black opacity-7 h-6 w-6 text-xl block bg-gray-400 py-0 rounded-full">
+							<span className="text-black opacity-7 text-xl">
 							x
 							</span>
 						</button>

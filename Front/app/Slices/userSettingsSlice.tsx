@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAction, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
@@ -23,24 +23,16 @@ type bodyData = {
 
 export const fetchUserSettings = createAsyncThunk('setuser/fetch',async (thunkAPI) => {
   const response = await axios.get('http://localhost:4000/Chat/userSettings', {withCredentials: true });
-    if (response.status === 401){
-      console.log('Eroororororo 401');
-    }
     if (response.status === 200) {
-      console.log('Data getted successfully:', response.data);
-      console.log("status = ", response.headers["set-cookies"]);
       return (response.data);
-    }else {
-      console.error('Data getting failed:', response.data);
     }
   } )
-
-
 
 export const Action = createAsyncThunk(
    'setuser/action',
    async ({endpoint, bodyData} : {endpoint : string, bodyData : bodyData}, thunnkAPi) => {
       try {
+        
         const response = await fetch(`http://localhost:4000/Chat/${endpoint}`, {
           method: 'POST', 
           mode: 'cors',
@@ -59,12 +51,21 @@ export const Action = createAsyncThunk(
     }
 );
 
-const initialState: {entity: null | userSettingsData ; loading: boolean; error: null | string } = {
+let initialState: {entity: null | userSettingsData ; loading: boolean; error: null | string } = {
   entity:null,
   loading:true,
   error: null
 
 } ;
+
+// export const addInvitation = createAction(
+  
+ 
+//     console.log("kan hna weld l3abd", username);
+    
+//     return username;
+//   }
+//  );
 
 const userSettingSlice = createSlice({
  name: 'setuser',
@@ -73,6 +74,21 @@ const userSettingSlice = createSlice({
   //  setUserSettings: (state, action: PayloadAction<{entity: null | userSettingsData ; loading: boolean; error: null | string }>) => {
   //    state.entity?.bandUsers =  action.payload.entity;
   //  },
+  addInvitation : (state, action) => {
+ console.log("actioneeess payload ",action.payload);
+ console.log("ghaleb lahhh 2",state.entity?.invitations);
+ // Mutate the state directly
+ state.entity?.invitations.push(action.payload);
+ console.log("ghaleb lahhh 2",state.entity?.invitations);
+},
+  // addInvitation : (state, action: PayloadAction<string>) => {
+  //     console.log("actioneeess payload ",action.payload);
+  //     console.log("ghaleb lahhh 2",state.entity?.invitations);
+  //     //  state.entity?.invitations.push(action.payload);
+  //      state.entity?.invitations = [...state.entity?.invitations as string[],action.payload]
+  //      console.log("ghaleb lahhh 2",state.entity?.invitations);
+       
+  //    },
  },
  extraReducers: (builder) => {
     builder
@@ -86,7 +102,6 @@ const userSettingSlice = createSlice({
     .addCase(fetchUserSettings.rejected, (state, action) => {
       state.loading = false;
       state.error = action.error.message || 'User settings error !';
-      console.error('Error:', action.error);
     })
     .addCase(Action.fulfilled, (state, action) => {
       state.loading = false;
@@ -97,7 +112,7 @@ const userSettingSlice = createSlice({
       else if (action.payload.action == "addFriend") {
         let index : number = state.entity?.invitations.indexOf(action.payload.username) as number
         state.entity?.invitations.splice(index, 1);
-        state.entity?.friends.push({name : action.payload.username, online : false, inGame : false, id : action.payload.id});
+        state.entity?.friends.push({name : action.payload.username, online : action.payload.online, inGame : action.payload.inGame, id : action.payload.id});
       }
       else if (action.payload.action == "removeFriend") { // modify this part
         let index : number = state.entity?.friends.indexOf(action.payload.username) as number
@@ -120,3 +135,4 @@ const userSettingSlice = createSlice({
 // export const { setUserSettings } = userSettingSlice.actions;
 
 export default userSettingSlice.reducer;
+export const { addInvitation } = userSettingSlice.actions;

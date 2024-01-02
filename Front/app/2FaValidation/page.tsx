@@ -43,7 +43,6 @@ export default function TwoFactorValidation() {
   const handleValidate = async () => {
   
     body.code = otpValues.join('');
-    console.log("otp", body)
     
     await axios.post('http://localhost:4000/2FA/validation', body, {withCredentials: true})
     .then(response => {

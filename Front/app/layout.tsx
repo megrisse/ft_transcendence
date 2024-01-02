@@ -5,11 +5,9 @@ import Sidebar from './components/Sidebar'
 import { Space_Grotesk } from 'next/font/google';
 import MyProvider from './store/provider';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AiOutlineMenu } from "react-icons/ai";
 import React from 'react';
-import { getCookie } from 'cookies-next';
-import NotFoud404 from './notFoud404/page';
 
 
 interface Datas {
@@ -33,17 +31,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
 
-    //console.log("token from lyout = ", getCookie('jwt-token'))
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [childData, setChildData] = useState<Datas>({loading: true, error: null});
-    //useEffect(() => {
-    //  setChildData(childData);
-    //}, [childData])
-    
+
     const handleData = (data: Datas) => {
       setChildData(data);
     };
-    //console.log('parent data = ', childData);
 
     const router = usePathname();
     const handleMouseEnter = () => {
@@ -53,12 +46,6 @@ export default function RootLayout({
     const handleMouseLeave = () => {
       setIsOpen(false)
     }
-    // console.log(isOpen);
-    
-
-    // if (router !== '/chat' && router !== '/profile' && router !== '/setting' && router !== '/login' && router !== '/rank' && router !== '/profs' && router !== '/game' && router !== '/2FaValidation' && router !== '/userSettings'  && router !== '/channelSet'  && router !== '/channel' && router.startsWith("/profile/")) {
-    //   return <NotFoud404/>;
-    // }
 
     if (router === '/2FaValidation' || router === '/login'){
 

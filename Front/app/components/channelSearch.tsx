@@ -41,12 +41,10 @@ const ChannelSearch = () => {
     const handleChange = async (event: any) => {
       setMessage(event.target.value);
       await getSearchData();
-      console.log('value is:', event.target.value);
     };
 
     const handlePasswordChange = async (event: any) => {
       setPassword(event.target.value);
-      console.log('value is:', event.target.value);
     };
 
     let alert : string = "";
@@ -76,8 +74,8 @@ const ChannelSearch = () => {
         </button>
       )}
       <button
-        className="m-2 p-2 border border-[#E58E27] text-white active:bg-[#323232]
-      font-bold px-2 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1"
+        className="m-2 py-2 px-4  border border-[#E58E27] text-white active:bg-[#323232] text-sm
+      rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1"
         type="button"
         onClick={() => setShowModal(true)}
       >
@@ -108,8 +106,7 @@ const ChannelSearch = () => {
                                     <p>{name.name}</p>
                                     <input className={(name.isProtected === true ? "border border-black rounded bg-[#E58E27]" : "invisible")} onChange={handlePasswordChange}/>
                                     <button className="bg-[#E58E27] text-white rounded p-1" onClick={() => {
-                                      SetChannelToJoin({...name, name: name.name, isProtected: name.isProtected});
-                                      console.log('Button clicked');}}>
+                                      SetChannelToJoin({...name, name: name.name, isProtected: name.isProtected});}}>
                                       JOIN
                                       </button>
                                     {/* <button className="bg-[#E58E27] text-white rounded p-1" onClick={() => SendJoin(name)}>JOIN</button> */}

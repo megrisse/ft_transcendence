@@ -1,10 +1,12 @@
 'use client';
 import { useSelector } from "react-redux";
 import { RootState, useAppDispatch } from "../store/store";
-import Card from "./Card";
 import React, { useEffect, useState } from 'react';
-import { fetchUserSettings } from "../Slices/userSettingsSlice";
+import { addInvitation, fetchUserSettings } from "../Slices/userSettingsSlice";
 import FriendsCard from "./FriendsCard";
+import {socket} from "./userSettings.socket"
+import BandCard from "./band.card";
+import InviteCard from "./invite.card";
 
 type friends = {
     name : string;
@@ -21,32 +23,35 @@ export type userSettingsData = {
 };
  
 function UserSettings() {
-    // const dispatch = useAppDispatch();
-    const userSettingsData : userSettingsData | null = useSelector((state: RootState) => state.setuser.entity)
-    
-    // const fetchInfo = () => { 
-    //     return fetch("http://localhost:4000/Chat/userSettings", {
-    //         method : "GET",
-    //         credentials : 'include'
-    //     }) 
-    //             .then((res) => res.json()) 
-    //             .then((d) => 
-    //             {
-    //                 console.log(d);
-    //             }).catch((error) => {
-    //                 console.error('Error:', error);
-    //             })
+    const [data, SetReceived] = useState<string[]>([])
+    const dispatch = useAppDispatch()
+    useEffect(()=> {
+        socket.connect();
+        return ()=> {
+            socket.disconnect();
+        }
+    },[])
+    // useEffect(() => {
+
+    // },[])
+    // useEffect(()=> {
+    //     socket.on("invite", (username : string)=> {
+    //         // SetReceived([...])
+    //         // console.log("recieved : ", username);
+    //     });
+    //     return ()=> {
+    //       socket.off("invite");
     //     }
-        
-        // useEffect(() => {
-            // dispatch(fetchUserSettings());
-        // }, [dispatch])
-        // console.log("fetched Data : ", userSettingsData);
+    //    },[socket])
+    const userSettingsData : userSettingsData | null = useSelector((state: RootState) => state.setuser.entity)
     return (
              <div className="h-full w-full flex md:flex-row flex-col items-center justify-around min-w-1179px max-w-1179px">
-                <FriendsCard title="Friends" user={userSettingsData?.user as string}/>
-                <Card data={userSettingsData?.bandUsers as string[]} title="BandUsers" user={userSettingsData?.user as string}/>
-                <Card data={userSettingsData?.invitations as string[]} title="Invitations" user={userSettingsData?.user as string}/>
+                {/* <FriendsCard title="Friends" user={userSettingsData?.user as string} socket={socket}/>
+                <BandCard title="BandUsers" user={userSettingsData?.user as string} socket={socket}/>
+                <InviteCard title="Invitations" user={userSettingsData?.user as string} socket={socket}/> */}
+                <FriendsCard title="Friends"socket={socket}/>
+                <BandCard title="BandUsers" socket={socket}/>
+                <InviteCard title="Invitations" socket={socket}/>
             </div>
     );
 }

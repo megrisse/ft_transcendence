@@ -11,8 +11,6 @@ import { RootState } from "../../store/store";
 import { PropagateLoader } from "react-spinners";
 import { BsPersonFillAdd } from "react-icons/bs";
 import { SlOptions } from "react-icons/sl";
-import { BsPersonFillX } from "react-icons/bs";
-import { ImBlocked } from "react-icons/im";
 import { useRouter } from "next/navigation";
 
 
@@ -23,6 +21,8 @@ type Props = {
 }
 
 export default function Pra({params}: Props) {
+
+  const Achievs = useSelector((state: RootState) => state.user.entity?.achievements);
 
   const [data, setData] = useState<UserInfos | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -39,22 +39,13 @@ export default function Pra({params}: Props) {
       try {
         const response = await axios.get(`http://localhost:4000/Profile/${params.id}`, {withCredentials: true });
         if (response.data){
-    
-          
           setData(response.data);
           setAchievs(response.data.achievements);
           setmatchHist(response.data.matches);
           setIsFriend(response.data.isFriend);
           setLoading(false);
-          // console.log('matchHist data ==:', response.data.matches);
         }
-        // if(response.status === 401){
-          //   console.error('Error fetching data:', error);
-          //   setLoading(false);
-          //   setError("Error profile not something !");
-          // }
         } catch (error) {
-          console.error('Error fetching data:', error);
           setLoading(false);
           setError("Error profile not something !");
         }
@@ -64,43 +55,22 @@ export default function Pra({params}: Props) {
       
     }, [params.id]);
     
-    console.log('Fetching data ==:', achievs);
-    console.log('matchHist data ==:', matchHist);
-
-  // useEffect(() => {
-  //   const handleClickOutside = (e: MouseEvent) => {
-  //     if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-  //       setIsOption(false);
-  //     }
-  //   };
-   
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  //  }, []);
 
   const matchHIst = useSelector((state: RootState) => state.user.entity?.matches);
-  const Achievs = useSelector((state: RootState) => state.user.entity?.achievements);
   const dataUser = useSelector((state: RootState) => state.user.entity?.userData);
 
   const handleAddFriendClick = async () => {
     const username = data?.userData.username;
     if (!isFriend){
       const response = await axios.post(`http://localhost:4000/Chat/invite`, {username}, {withCredentials: true });
-      if (response.data === 200)
+      if (response.status === 200)
         setIsFriend(true);
-      else{
-        console.error('invite not accepted yet !');
-      }
-
     }
   }
 
   const handleOptionClick  = () => {
     setIsOption(!isOption);
     router.push('/userSettings');
-    console.log('options bool = ', isOption);
   }
 
   if (loading){
@@ -132,9 +102,7 @@ export default function Pra({params}: Props) {
           <div className="flex flex-col xMedium:flex-row w-[100%] items-center xMedium:w-full medium:h-[40%] xMedium:h-[35%] xLarge:h-[45%] Large:h-[38%] rounded-lg medium:mb-2 m-auto">
             <div className="min-w-[30%] w-72 h-[70%] medium:h-[45%] relative">
               <div className="grid h-full w-full content-center ">
-                {<Image className='rounded-full border-4 mx-auto w-40 h-40 xMedium:w-36 xMedium:h-36 Large:w-56 Large:h-56 border-[#E58E27]' alt='user Image' src={data?.userData?.avatar || "/noBadge.png"} height={150} width={150}/>}
-
-                {/* <Image className='shadow-neon-light' layout="fill" objectFit="contain" src={'/gsus.jpeg'} alt="PING PONG" /> */}
+                {<Image className='rounded-full border-4 mx-auto w-40 h-40 xMedium:w-32 xMedium:h-32 Large:w-40 Large:h-40 border-[#E58E27]' alt='user Image' src={data?.userData?.avatar || "/noBadge.png"} height={150} width={150} priority/>}
               </div>
               <div className="absolute xMedium:w-full top-36 left-52 medium:top-36 xMedium:left-9 xMedium:top-36 Large:top-48 Large:left-16 xLarge:left-24 xLarge:top-52">
                   <button onClick={handleAddFriendClick} className={`${isFriend ? "hidden" : "flex"} items-end`}>
@@ -142,21 +110,6 @@ export default function Pra({params}: Props) {
                     <div className="text-sm text-[#E58E27]">Add friend</div>
                   </button>
                   <button onClick={handleOptionClick} id="dropdownDefaultButton" data-dropdown-toggle="dropdown" className={`${isFriend ? "flex" : "hidden"} z-50 items-end py-2 xMedium:py-0 xMedium:px-1 text-2xl text-[#E58E27] relative`}><div ref={dropdownRef}><SlOptions className="absolute left-1 top-3 medium:left-3 medium::top-5 xMedium:-left-5 xMedium:-top-5"/></div></button>
-{/* DropDown menu */}
-
-{/* <div  id="dropdown" className={`z-40 ${!isOption ? "hidden" : "block"} divide-y divide-gray-100 rounded-lg shadow h-28 w-44 bg-[#323232] bg-opacity-75 absolute top-3 -left-1 medium:left-1 xMedium:-top-5 xMedium:-left-6`}>
-    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200 mt-5" aria-labelledby="dropdownDefaultButton">
-      <li className="flex">
-        <a href="#" className="flex w-full justify-between px-4 py-2 hover:bg-gray-100 hover:bg-opacity-20 text-white dark:hover:bg-gray-100 text-md dark:hover:text-[#E58E27]">DELETE <BsPersonFillX className="text-xl bg-[#E58E27] rounded-lg p-1 text-red-600"/></a>
-        
-      </li>
-      <li>
-        <a href="#" className="flex w-full justify-between px-4 py-2 hover:bg-gray-100 hover:bg-opacity-20 text-white dark:hover:bg-gray-100 dark:hover:text-[#E58E27]">Block <ImBlocked className="text-lg bg-[#E58E27] rounded-lg p-1 text-red-600"/></a>
-      </li>
-    </ul>
-</div> */}
-
-{/* DropDown menu */}
                 </div>
             </div>
             <div className="flex flex-col my-auto h-48 medium:h-[40%] w-[70%] justify-between text-[14px] xMedium:w-[90%] medium:rounded-xl rounded-2xl min-w-[320px] Large:h-[90%] xLarge:h-[95%] xMedium:h-[60%] xMedium:text-[16px]">
@@ -175,7 +128,6 @@ export default function Pra({params}: Props) {
               </div>
             </div>
           </div>
-          {/* <Achievements noBadge={"user.pathImg"}/> */}
           {Achievs && <Achievements noBadge="/noBadge.png" Achievs={data?.achievements} />}
         </div>
         <div className=" medium:h-[90%] Large:h-[95%] w-full medium:w-[38%] medium:min-w-[50%] m-auto bg-[#323232] flex flex-col items-center rounded-2xl">
