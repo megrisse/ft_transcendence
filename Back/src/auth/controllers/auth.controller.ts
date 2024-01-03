@@ -24,16 +24,16 @@ export class AuthController {
     async fortytwoAuthCallback(@Req() req:Request & {user: UserDto},  @Res() res: Response) {
 
         const user1 : UserDto = await this.user.getUserByUsername(req.user.username)
-
+    
         if (user1 && user1.id !== req.user.id) {
             var user : UserDto = await this.userService.createUser(req.user);
-            user = await this.user.updateUsername(req.user.id, req.user.username + "-")
-            var token = await this.userService.sign(user.id, user.username);
+            user = await this.user.updateUsername(user.id, user.username + "-")
         }
         else {
             var user : UserDto = await this.userService.createUser(req.user);
-            var token = await this.userService.sign(user.id, user.username);
         }
+
+        const token = await this.userService.sign(user.id, user.username);
         res.cookie('jwt-token', token, {
             expires: new Date(Date.now() + 900000000),
             httpOnly: true
@@ -41,16 +41,16 @@ export class AuthController {
 
         if (user.IsEnabled)
             res.redirect('http://localhost:3000/2FaValidation')
-        else if ((user.isLogg) === false) {
+        else if (!user.islogg) {
 
-            console.log("user", user);
-            await this.userService.updateIslogg(user.id, true)
+            user = await this.userService.updateIslogg(user.id, true);
             res.redirect(`http://localhost:3000/setting`);
+            return;
         }
-        else if (user.isLogg === true) {
+        else {
 
-            console.log("user else ", user);
             res.redirect(`http://localhost:3000/profile`);
+            return ;
         }
     }
 

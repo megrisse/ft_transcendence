@@ -34,7 +34,7 @@ export class UserDto {
 
     rank ?: number;
 
-    isLogg?: boolean;
+    islogg ?:boolean;
 }
 
 export class TwoFaV {
