@@ -12,7 +12,7 @@ interface SignInProps {
 
 export const SignUpContainer: React.FC<React.PropsWithChildren<SignInProps>> = ({ signinIn, children }) => (
   <div
-    className={`absolute top-0 h-full transition-all duration-600 ease-in-out left-0 w-1/2 opacity-0 z-10 ${
+    className={`absolute top-0 h-full transition-all duration-700 ease-in-out left-0 w-1/2 opacity-0 z-10 ${
       !signinIn ? "translate-x-full opacity-100 z-50" : ""
     }`}
   >
@@ -22,7 +22,7 @@ export const SignUpContainer: React.FC<React.PropsWithChildren<SignInProps>> = (
 
 export const SignInContainer: React.FC<React.PropsWithChildren<SignInProps>> = ({ signinIn, children }) => (
   <div
-    className={`absolute top-0 h-full transition-all duration-600 ease-in-out left-0 w-1/2 z-20 ${
+    className={`absolute top-0 h-full transition-all duration-700 ease-in-out left-0 w-1/2 z-20 ${
       !signinIn ? "translate-x-full" : ""
     }`}
   >
