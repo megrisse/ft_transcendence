@@ -1,18 +1,71 @@
-import Image  from "next/image"
-import { Button } from "@mui/material"
+"use client";
 
-export default function login() {
+import React, { useState } from "react";
+import {
+  Container,
+  SignUpContainer,
+  SignInContainer,
+  Form,
+  Title,
+  Input,
+  Button,
+  GhostButton,
+  Anchor,
+  Anchor1,
+  OverlayContainer,
+  Overlay,
+  LeftOverlayPanel,
+  RightOverlayPanel,
+  Paragraph,
+} from "../components/Components";
 
-    return (
-        <div className="flex items-end justify-center w-full h-full">
-              <div className="flex justify-end w-40 h-20 mb-20 ml-20">
-                <Button className="bg-[#E58E27] flex h-full w-full mb-20 mr-20">
-                    <a className="text-white w-full h-full m-auto"  href="http://localhost:4000/auth/42">connect<br></br>with</a>
-                </Button>
-              </div>
-              <div className=" xMedium:min-w-[600px] hidden medium:block aligin-self-end mr-40">
-                <Image className='' alt='' src={'/pingPaddles.png'} height={800} width={800} priority/>
-              </div>
-        </div>
-    )
-}
+const login: React.FC = () => {
+  const [signIn, toggle] = useState(true);
+
+  return (
+    <Container>
+      <SignUpContainer signinIn={signIn}>
+        <Form>
+          <h1 className="font-bold m-0 text-black">Create Account</h1>
+          <Input type="text" placeholder="Username" />
+          <Input type="password" placeholder="Password" />
+          <Input type="password" placeholder="Confirm Password" />
+          <Button>Sign Up</Button>
+        </Form>
+      </SignUpContainer>
+
+      <SignInContainer signinIn={signIn}>
+        <Form>
+          <h1 className="font-bold m-0 text-black">Sign in</h1>
+          <Input type="text" placeholder="Username" />
+          <Input type="password" placeholder="Password" />
+          <Button>
+            <Anchor1 href="/#">Log In with your Intra</Anchor1>
+          </Button>
+          <Anchor href="/#">Forgot your password?</Anchor>
+          <Button>Sign In</Button>
+        </Form>
+      </SignInContainer>
+
+      <OverlayContainer signinIn={signIn}>
+        <Overlay signinIn={signIn}>
+          <LeftOverlayPanel signinIn={signIn}>
+            <Title>Welcome Back!</Title>
+            <Paragraph>Login with your personal info</Paragraph>
+            <GhostButton onClick={() => toggle(true)}>Sign In</GhostButton>
+          </LeftOverlayPanel>
+
+          <RightOverlayPanel signinIn={signIn}>
+            <Title>Hello, Friend!</Title>
+            <Paragraph>
+              Enter your personal details and start your journey with us
+            </Paragraph>
+            <GhostButton onClick={() => toggle(false)}>Sign Up</GhostButton>
+          </RightOverlayPanel>
+        </Overlay>
+      </OverlayContainer>
+    </Container>
+  );
+};
+
+export default login;
